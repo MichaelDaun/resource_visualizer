@@ -22,15 +22,15 @@
   note: Majoritetsägare; regionala företag äger resten.
 
 - from: vaxjo-municipality
-  to: videum-science-park
+  to: vaxjo-linnaeus-science-park
   type: owns
 
 - from: region-kronoberg
   to: foretagsfabriken
   type: owns
-  note: Ägs till lika delar av Region Kronoberg, Videum och Linnéuniversitetet.
+  note: Ägs till lika delar av Region Kronoberg, Videum Science Park (Växjö kommun) och Linnéuniversitetet.
 
-- from: videum-science-park
+- from: vaxjo-linnaeus-science-park
   to: foretagsfabriken
   type: owns
 

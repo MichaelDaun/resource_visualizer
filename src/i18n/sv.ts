@@ -45,6 +45,7 @@ export const sv = {
   emptyHint: "Välj en kommun eller en symbol för att se vad som finns där.",
   countVisible: (shown: number, total: number) => (shown === total ? `${total} poster` : `${shown} av ${total} poster`),
   attribution: "Kartdata © OpenStreetMap-bidragsgivare, SCB, Natural Earth",
+  attributionShort: "© OpenStreetMap, SCB",
   insetTitle: "Visa hela Kalmar och Kronobergs län",
   zoomIn: "Zooma in",
   zoomOut: "Zooma ut",

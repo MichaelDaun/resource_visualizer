@@ -56,6 +56,7 @@ async function main() {
             <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path d="M2.5 6V2.5H6M13.5 10v3.5H10M10 2.5h3.5V6M6 13.5H2.5V10" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
           </button>
         </div>
+        <p class="attribution-mobile">${esc(t.attributionShort)}</p>
         <footer class="colophon">
           <span class="status-line" aria-live="polite"></span>
           <span class="hint">${esc(t.emptyHint)}</span>
@@ -68,7 +69,7 @@ async function main() {
   const base = import.meta.env.BASE_URL;
   const topo = (await fetch(`${base}geo/sweden.topo.json`).then((r) => r.json())) as SwedenTopology;
   const geo = createGeoIndex(topo);
-  const graph = buildGraph(dataset, geo.locate);
+  const graph = buildGraph(dataset, geo.locate, geo.municipalityByName);
   const initial = readHash(graph, geo);
   const store = new Store({ ...initial, hovered: null, filters: defaultFilters() });
 

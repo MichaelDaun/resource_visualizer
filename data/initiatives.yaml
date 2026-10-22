@@ -1,8 +1,10 @@
 # Support aimed at SMEs: projects (time-limited), services (ongoing offerings),
-# funding (grants and calls) and programmes (e.g. incubators).
+# funding (grants, vouchers and calls) and programmes (e.g. incubators).
 # See docs/DATA.md for all fields and allowed values.
 #
-# Entries marked `example: true` have details that are guessed or not yet checked.
+# `serves` lists the municipalities an offer is meant for, when that is
+# narrower or wider than where its lead is. Entries marked `example: true`
+# have details that are guessed or not yet checked.
 
 # --- Linnéuniversitetet ---
 
@@ -15,45 +17,55 @@
   area: Kalmar län
   lead: linnaeus-university
   funders: [region-kalmar, eu-erdf]
-  website: https://www.lnu.se/en/meet-linnaeus-university/Organisation/faculty-of-technology/research/
-  example: true
-
-- id: smart-dat
-  name: Smart Dat
-  kind: project
-  status: ongoing
-  description: Projekt vid Linnéuniversitetet för datadriven utveckling i små och medelstora företag.
-  start: "2023-09"
-  end: "2026-12"
-  supportTypes: [digitalisation, innovation]
-  area: Kalmar och Kronobergs län
-  lead: linnaeus-university
-  funders: [eu-erdf, tillvaxtverket, region-kalmar, region-kronoberg]
-  website: https://www.lnu.se/en/research/research-projects/project-smart-dat/
-
-- id: hpc-sme
-  name: HPC för SMF
-  kind: project
-  status: ongoing
-  description: Ger små och medelstora företag tillgång till högpresterande beräkningar (HPC) och kompetens att använda dem.
-  supportTypes: [digitalisation, innovation]
-  area: Kalmar och Kronobergs län
-  lead: linnaeus-university
-  funders: [eu-erdf, tillvaxtverket, region-kalmar, region-kronoberg]
-  website: https://lnu.se/mot-linneuniversitetet/Organisation/fakulteten-for-teknik/stod-for-sma-och-medelstora-foretag-i-linneregionen-for-att-starka-teknisk-kompetens-och-konkurrenskraft/
   example: true
 
 - id: iot-lab-sme
   name: IoT-lab för SMF 2.0
   kind: project
   status: ongoing
-  description: Labbmiljö där små och medelstora företag kan testa och utveckla lösningar med sakernas internet (IoT).
+  description: Bygger ett nätverk av företag som drar nytta av varandras kompetens inom sakernas internet (IoT), för att effektivisera verksamheten, minska kostnader och klimatavtryck eller utveckla nya digitala affärsmodeller.
+  supportTypes: [digitalisation, innovation, networking]
+  area: Kalmar och Kronobergs län
+  lead: linnaeus-university
+  funders: [eu-erdf, tillvaxtverket, region-kalmar, region-kronoberg]
+  website: https://lnu.se/forskning/forskningsprojekt/projekt-iot-lab-for-smf-2-.-0/
+
+- id: hpc-sme
+  name: HPC för SMF
+  kind: project
+  status: ongoing
+  description: Stöttar små och medelstora företag att utveckla sin datadrivna förmåga med hjälp av AI och högpresterande beräkningar (HPC).
   supportTypes: [digitalisation, innovation]
   area: Kalmar och Kronobergs län
   lead: linnaeus-university
   funders: [eu-erdf, tillvaxtverket, region-kalmar, region-kronoberg]
-  website: https://lnu.se/mot-linneuniversitetet/Organisation/fakulteten-for-teknik/stod-for-sma-och-medelstora-foretag-i-linneregionen-for-att-starka-teknisk-kompetens-och-konkurrenskraft/
-  example: true
+  website: https://lnu.se/forskning/forskningsprojekt/projekt-hpc-for-smf/
+
+- id: smart-dat
+  name: Smart Dat
+  kind: project
+  status: ongoing
+  description: Stöttar tillverkande industrier som vill automatisera och digitalisera sin verksamhet.
+  start: "2023-09"
+  end: "2026-12"
+  supportTypes: [digitalisation, innovation]
+  area: Kalmar och Kronobergs län
+  lead: linnaeus-university
+  funders: [eu-erdf, tillvaxtverket, region-kalmar, region-kronoberg]
+  website: https://lnu.se/forskning/forskningsprojekt/projekt-smart-dat/
+
+- id: seps
+  name: Smart elektrifiering – produkter och system
+  kind: project
+  status: ongoing
+  description: Projekt om kraftelektronik och elektrifiering för små och medelstora företag i båda länen, tillsammans med IUC Kalmar län och Campus Ljungby.
+  start: "2024-09"
+  end: "2027-12"
+  supportTypes: [innovation, skills]
+  area: Kalmar och Kronobergs län
+  lead: linnaeus-university
+  partners: [iuc-kalmar, campus-ljungby]
+  website: https://iuc-kalmar.se/smart-elektrifiering-produkter-och-system/
 
 - id: cee
   name: CEE – Center for Energy and Environment
@@ -71,35 +83,95 @@
 
 # --- Kalmar län ---
 
+- id: regional-business-grants-kalmar
+  name: Företagsstöd från Region Kalmar län
+  kind: funding
+  status: ongoing
+  description: Små och medelstora företag i länet kan söka bidrag för att utveckla företaget, med syfte att stimulera hållbar utveckling och tillväxt i hela länet.
+  supportTypes: [financing, innovation, sustainability]
+  area: Kalmar län
+  lead: region-kalmar
+  serves: [Borgholm, Emmaboda, Hultsfred, Högsby, Kalmar, Mönsterås, Mörbylånga, Nybro, Oskarshamn, Torsås, Vimmerby, Västervik]
+
 - id: almi-kalmar-loans-advice
-  name: Lån och affärsrådgivning
+  name: Lån, riskkapital och affärsutveckling
   kind: service
   status: ongoing
   description: Finansiering och rådgivning för företag i olika skeden.
   supportTypes: [financing, advisory]
   area: Kalmar län
   lead: almi-kalmar
+  serves: [Borgholm, Emmaboda, Hultsfred, Högsby, Kalmar, Mönsterås, Mörbylånga, Nybro, Oskarshamn, Torsås, Vimmerby, Västervik]
 
 - id: kalmar-incubator
-  name: Inkubatorn vid Kalmar Science Park
+  name: Regional inkubator
   kind: programme
   status: ongoing
-  description: Affärsutveckling för idébärare och nystartade företag. Vinnova har utsett inkubatorn till en av landets kvalitetsgranskade inkubatorer.
+  description: Affärsutveckling för nystartade och unga företag i hela Kalmar län med innovationer som driver omställningen till ett hållbart samhälle.
   supportTypes: [innovation, advisory]
   area: Kalmar län
   lead: kalmar-science-park
   partners: [linnaeus-university]
   funders: [vinnova, region-kalmar]
+  serves: [Borgholm, Emmaboda, Hultsfred, Högsby, Kalmar, Mönsterås, Mörbylånga, Nybro, Oskarshamn, Torsås, Vimmerby, Västervik]
 
-- id: regional-business-grants-kalmar
-  name: Regionala företagsstöd
-  kind: funding
+- id: iuc-industry
+  name: Teknik- och kompetensstöd för industrin
+  kind: service
   status: ongoing
-  description: Stöd som företag kan söka hos regionen, till exempel för investeringar och utveckling. Villkor och belopp ska kompletteras.
-  supportTypes: [financing, innovation]
+  description: Tjänster och kunskap inom ny teknik, automation, digitalisering, robotisering och nya material för länets industriföretag.
+  supportTypes: [digitalisation, innovation, skills]
   area: Kalmar län
-  lead: region-kalmar
-  example: true
+  lead: iuc-kalmar
+
+- id: food-development-southeast
+  name: Livsmedelsutveckling Sydost
+  kind: service
+  status: ongoing
+  description: Utveckling och innovation för dig som är verksam inom livsmedelsproduktion, restaurang och handel i sydöstra Sverige.
+  supportTypes: [innovation, networking]
+  area: Sydöstra Sverige
+  lead: iuc-kalmar
+  website: https://iuc-kalmar.se/livsmedelsutveckling-sydost/
+
+- id: atrinova-advice
+  name: Rådgivning för att starta och utveckla företag
+  kind: service
+  status: ongoing
+  description: Kostnadsfri rådgivning under sekretess och anpassade utbildningar för nya och befintliga företagare.
+  supportTypes: [advisory, skills]
+  area: Hultsfred, Högsby, Mönsterås, Oskarshamn, Vimmerby och Västervik
+  lead: atrinova
+  serves: [Hultsfred, Högsby, Mönsterås, Oskarshamn, Vimmerby, Västervik]
+
+- id: nfc-kalmarsund-advice
+  name: Nyföretagarrådgivning
+  kind: service
+  status: ongoing
+  description: Kostnadsfri och konfidentiell rådgivning för dig som är nyföretagare.
+  supportTypes: [advisory]
+  area: Kalmar, Borgholm, Mörbylånga, Nybro, Emmaboda och Torsås
+  lead: nfc-kalmarsund
+  serves: [Kalmar, Borgholm, Mörbylånga, Nybro, Emmaboda, Torsås]
+
+- id: coompanion-kalmar-advice
+  name: Rådgivning för kooperativt företagande
+  kind: service
+  status: ongoing
+  description: För er som vill utveckla en idé eller ett företag tillsammans, och för företag och organisationer inom den sociala ekonomin.
+  supportTypes: [advisory, networking]
+  area: Kalmar län
+  lead: coompanion-kalmar
+  serves: [Borgholm, Emmaboda, Hultsfred, Högsby, Kalmar, Mönsterås, Mörbylånga, Nybro, Oskarshamn, Torsås, Vimmerby, Västervik]
+
+- id: ehealth-advice
+  name: Råd och stöd inom e-hälsa
+  kind: service
+  status: ongoing
+  description: Råd och stöd till företagare och entreprenörer inom e-hälsa, både för att starta och för att utveckla företaget eller idén.
+  supportTypes: [advisory, innovation]
+  area: Kalmar län
+  lead: ehealth-arena
 
 - id: atc-services
   name: 3D-printing och uppdragsutbildning
@@ -120,32 +192,187 @@
   lead: additive-tech-center
   example: true
 
+# --- Båda länen ---
+
+- id: energy-support-companies
+  name: Energistöd till företag
+  kind: project
+  status: ongoing
+  description: Insatser i tidsbegränsade projekt för att stärka företags energimedvetenhet och minska kostnader och resursanvändning.
+  supportTypes: [sustainability, advisory]
+  area: Kalmar och Kronobergs län
+  lead: energikontor-syd
+  serves: [Borgholm, Emmaboda, Hultsfred, Högsby, Kalmar, Mönsterås, Mörbylånga, Nybro, Oskarshamn, Torsås, Vimmerby, Västervik, Alvesta, Lessebo, Ljungby, Markaryd, Tingsryd, Uppvidinge, Växjö, Älmhult]
+  example: true
+
 # --- Kronobergs län ---
 
 - id: almi-kronoberg-loans-advice
-  name: Lån och affärsrådgivning
+  name: Lån, riskkapital och affärsutveckling
   kind: service
   status: ongoing
-  description: Finansiering och rådgivning för företag i olika skeden.
+  description: Rådgivning, lån och riskkapital i företagandets alla faser.
   supportTypes: [financing, advisory]
   area: Kronobergs län
   lead: almi-kronoberg
+  serves: [Alvesta, Lessebo, Ljungby, Markaryd, Tingsryd, Uppvidinge, Växjö, Älmhult]
 
-- id: foretagsfabriken-incubator
-  name: Inkubatorprogram
-  kind: programme
-  status: ongoing
-  description: Inkubation för kunskapsintensiva företag med potential att växa och nå en internationell marknad.
-  supportTypes: [innovation, advisory]
-  area: Kronobergs län
-  lead: foretagsfabriken
-
-- id: regional-business-grants-kronoberg
-  name: Regionala företagsstöd
+- id: development-voucher-kronoberg
+  name: Utvecklingscheck
   kind: funding
   status: ongoing
-  description: Stöd som företag kan söka hos regionen, till exempel för investeringar och utveckling. Villkor och belopp ska kompletteras.
+  description: Ekonomiskt stöd för att utveckla företaget, med rådgivning från Almi. Utlysningstider och villkor finns hos Region Kronoberg.
   supportTypes: [financing, innovation]
   area: Kronobergs län
   lead: region-kronoberg
+  partners: [almi-kronoberg]
+  serves: [Alvesta, Lessebo, Ljungby, Markaryd, Tingsryd, Uppvidinge, Växjö, Älmhult]
+  website: https://www.regionkronoberg.se/regional-utveckling/finansiering/stod-till-foretagsutveckling/
+
+- id: micro-investment-kronoberg
+  name: Stöd till mikroinvestering
+  kind: funding
+  status: ongoing
+  description: Stöd till mindre investeringar i företaget, med rådgivning från Almi.
+  supportTypes: [financing]
+  area: Kronobergs län
+  lead: region-kronoberg
+  partners: [almi-kronoberg]
+  serves: [Alvesta, Lessebo, Ljungby, Markaryd, Tingsryd, Uppvidinge, Växjö, Älmhult]
+  website: https://www.regionkronoberg.se/regional-utveckling/finansiering/stod-till-foretagsutveckling/
+
+- id: konsulttimmen
+  name: Konsulttimmen
+  kind: service
+  status: ongoing
+  description: Sex kostnadsfria timmar expertrådgivning för småföretag med 0–49 anställda, inom till exempel ekonomi och juridik, marknad och sälj, IT och digitalisering, produktutveckling, export och hållbarhet.
+  supportTypes: [advisory, digitalisation, sustainability, internationalisation]
+  area: Kronobergs län
+  lead: region-kronoberg
+  serves: [Alvesta, Lessebo, Ljungby, Markaryd, Tingsryd, Uppvidinge, Växjö, Älmhult]
+  website: https://www.regionkronoberg.se/regional-utveckling/finansiering/stod-till-foretagsutveckling/
+
+- id: foretagsfabriken-incubator
+  name: Tillväxtprogram
+  kind: programme
+  status: ongoing
+  description: Ett tillväxtprogram på upp till 30 månader med kontinuerlig affärsutveckling från en utvald affärsutvecklare och relevanta utbildningar.
+  supportTypes: [innovation, advisory, skills]
+  area: Kronobergs län
+  lead: foretagsfabriken
+  serves: [Alvesta, Lessebo, Ljungby, Markaryd, Tingsryd, Uppvidinge, Växjö, Älmhult]
+
+- id: vlsp-network
+  name: Nätverk och innovationsmiljö
+  kind: service
+  status: ongoing
+  description: Möjlighet för företag och individer att utveckla och förverkliga innovativa koncept och att ingå i nätverk kring lokala och regionala kunskaps- och företagskluster.
+  supportTypes: [innovation, networking]
+  area: Växjö
+  lead: vaxjo-linnaeus-science-park
+
+- id: nfc-vaxjo-advice
+  name: Nyföretagarrådgivning
+  kind: service
+  status: ongoing
+  description: Kostnadsfri, personlig och konfidentiell rådgivning för dig som funderar på att starta eget eller redan har startat.
+  supportTypes: [advisory]
+  area: Växjö, Alvesta, Uppvidinge, Lessebo och Tingsryd
+  lead: nfc-vaxjo
+  serves: [Växjö, Alvesta, Uppvidinge, Lessebo, Tingsryd]
+
+- id: coompanion-kronoberg-advice
+  name: Rådgivning för kooperativt företagande
+  kind: service
+  status: ongoing
+  description: Kostnadsfri rådgivning, praktisk utbildning och hjälp att hitta samarbetspartner för er som vill starta och driva företag tillsammans.
+  supportTypes: [advisory, skills, networking]
+  area: Kronobergs län
+  lead: coompanion-kronoberg
+  serves: [Alvesta, Lessebo, Ljungby, Markaryd, Tingsryd, Uppvidinge, Växjö, Älmhult]
+
+- id: drivhuset-startup
+  name: Start-up Class
+  kind: programme
+  status: ongoing
+  description: Praktisk vägledning och program för studenter vid Linnéuniversitetet som vill starta företag.
+  supportTypes: [advisory, skills]
+  area: Linnéuniversitetet
+  lead: drivhuset-vaxjo
+
+- id: tourism-development
+  name: Utveckling för besöksnäringen
+  kind: service
+  status: ongoing
+  description: Stöd för företag inom besöksnäringen i Småland och Kronoberg. Detaljer ska kompletteras.
+  supportTypes: [networking, advisory]
+  area: Småland
+  lead: destination-smaland
   example: true
+
+# --- Nationellt ---
+
+- id: rise-innovation
+  name: Innovationsstöd för små och medelstora företag
+  kind: service
+  status: ongoing
+  description: Hjälp att utveckla teknologier, produkter, tjänster och processer, med särskilt fokus på små och medelstora företags innovationsprocesser.
+  supportTypes: [innovation]
+  area: Hela Sverige
+  lead: rise
+
+- id: export-advice
+  name: Exportrådgivning
+  kind: service
+  status: ongoing
+  description: Tjänster inom exportrådgivning, kontakter och marknadsanalyser på fler än 40 marknader.
+  supportTypes: [internationalisation, advisory]
+  area: Hela Sverige
+  lead: business-sweden
+
+- id: export-guarantees
+  name: Exportkreditgarantier
+  kind: funding
+  status: ongoing
+  description: Garantier för betalning och finansiering, med rådgivning om affärsstruktur och riskhantering vid export.
+  supportTypes: [internationalisation, financing]
+  area: Hela Sverige
+  lead: ekn
+
+- id: enterprise-europe-network
+  name: Enterprise Europe Network
+  kind: service
+  status: ongoing
+  description: Kostnadsfri rådgivning om internationella affärer och hjälp med affärskontakter för små och medelstora företag. Koordineras i Sverige av Tillväxtverket.
+  supportTypes: [internationalisation, networking]
+  area: Hela Sverige
+  lead: tillvaxtverket
+  website: https://enterpriseeurope.se
+
+- id: vinnova-calls
+  name: Utlysningar för innovation
+  kind: funding
+  status: ongoing
+  description: Finansiering av forsknings- och innovationsprojekt där företag kan söka eller delta. Erbjudandena varierar över tid.
+  supportTypes: [innovation, financing]
+  area: Hela Sverige
+  lead: vinnova
+
+- id: energy-grants
+  name: Stöd och bidrag på energiområdet
+  kind: funding
+  status: ongoing
+  description: Stöd att söka för energieffektivisering och energiomställning. Erbjudandena varierar över tid.
+  supportTypes: [sustainability, financing]
+  area: Hela Sverige
+  lead: energimyndigheten
+
+- id: klimatklivet
+  name: Klimatklivet
+  kind: funding
+  status: ongoing
+  description: Investeringsstöd till åtgärder som minskar utsläppen av växthusgaser.
+  supportTypes: [sustainability, financing]
+  area: Hela Sverige
+  lead: naturvardsverket
+  website: https://www.naturvardsverket.se/amnesomraden/klimatomstallningen/klimatklivet/

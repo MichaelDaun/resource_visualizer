@@ -14,7 +14,7 @@ test("map shows the basemap and nodes", async ({ page }) => {
   await page.goto("/");
   await expect(page.locator(".map-svg .home-county")).toHaveCount(2);
   await expect(page.locator('.map-svg .node[data-id="dika"]')).toHaveCount(1);
-  await expect(page.locator(".status-line")).toContainText("29 poster");
+  await expect(page.locator(".status-line")).toContainText("67 poster");
   // The detailed basemap loads after the first render.
   await expect(page.locator(".map-svg.has-detail")).toHaveCount(1);
   await expect(page.locator(".map-svg .roads path").first()).toBeAttached();
@@ -44,11 +44,11 @@ test("network view renders and filters apply", async ({ page, isMobile }) => {
   const errors = collectErrors(page);
   await page.goto("/");
   await page.getByRole("button", { name: "Nätverk", exact: true }).click();
-  await expect(page.locator(".network-svg .node")).toHaveCount(29);
+  await expect(page.locator(".network-svg .node")).toHaveCount(67);
   if (isMobile) await page.getByRole("button", { name: "Urval och teckenförklaring" }).click();
   await page.locator('.filter-row label:has(input[data-value="service"])').click();
-  await expect(page.locator(".network-svg .node")).toHaveCount(26);
-  await expect(page.locator(".status-line")).toContainText("26 av 29");
+  await expect(page.locator(".network-svg .node")).toHaveCount(50);
+  await expect(page.locator(".status-line")).toContainText("50 av 67");
   expect(errors).toEqual([]);
 });
 
@@ -100,11 +100,11 @@ test("'bara' shows a single value", async ({ page, isMobile }) => {
   const row = page.locator('.filter-row:has(input[data-value="programme"])');
   await row.hover();
   await row.getByRole("button", { name: "bara" }).click();
-  await expect(page.locator(".status-line")).toContainText("av 29");
+  await expect(page.locator(".status-line")).toContainText("av 67");
   await expect(page.locator('.map-svg .node[data-id="kalmar-incubator"]')).toHaveCount(1);
   await expect(page.locator('.map-svg .node[data-id="dika"]')).toHaveCount(0);
   await page.getByRole("button", { name: "Återställ" }).click();
-  await expect(page.locator(".status-line")).toContainText("29 poster");
+  await expect(page.locator(".status-line")).toContainText("67 poster");
 });
 
 test("the finder suggests offers for a company", async ({ page }) => {

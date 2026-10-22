@@ -1,5 +1,11 @@
 # Data reference
 
+The current entries are collected from public sources, mainly Region Kalmar
+län's list of business support organisations, Region Kronoberg's page on
+support for business development, Växjö kommun's list of business promoters
+and the organisations' own websites. Entries with guessed or unchecked details
+carry `example: true`, which shows a note in the app.
+
 All content lives in three YAML files in [`/data`](../data). They can be edited
 directly on GitHub (open the file, click the pencil icon, commit). Every change
 is checked automatically; if something is wrong, the check on the commit or pull
@@ -57,6 +63,7 @@ or OpenStreetMap and copy the latitude and longitude.
   lead: linnaeus-university    # actor id of who runs it (required)
   partners: [almi-kalmar]      # optional actor ids
   funders: [region-kalmar, eu-erdf]                   # optional actor ids
+  serves: [Hultsfred, Vimmerby]                       # optional municipality names, see below
   example: true                # optional
 ```
 
@@ -72,11 +79,17 @@ details panel lists other initiatives from the same lead automatically.
 
 ## Counties and municipalities
 
-You never enter a county or municipality: they are worked out from the
+You rarely enter a county or municipality: they are worked out from the
 coordinates. An actor belongs to every county it has a location in; an
 initiative belongs to the counties of its lead and partners. This drives the
-"Län" filter and the overview shown when someone clicks a municipality. Actors
-without `locations` are shown whichever county is selected.
+"Län" filter, the overview shown when someone clicks a municipality and the
+"Hitta stöd" page. Actors without `locations` are shown whichever county is
+selected, and their initiatives count as available everywhere.
+
+Use `serves` when an offer covers a different area than where its lead sits,
+for example an adviser in Oskarshamn who serves six municipalities. List the
+municipalities by their short name (`Hultsfred`, not `Hultsfreds kommun`).
+The tests check that every name exists.
 
 | `supportTypes`         | Shown as             |
 | ---------------------- | -------------------- |

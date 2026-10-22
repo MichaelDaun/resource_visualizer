@@ -578,6 +578,10 @@ input:focus-visible + .check {
   font-size: 11px;
 }
 
+.attribution-mobile {
+  display: none;
+}
+
 .scale-bar {
   position: absolute;
   left: 16px;
@@ -1434,6 +1438,24 @@ input:focus-visible + .check {
   fill: var(--ink-soft);
 }
 
+/* Initiatives are a little smaller until zoomed in, so clusters stay readable. */
+.map-svg:not(.z-detail) .node-initiative:not(.on-shelf) .glyph {
+  scale: 0.8;
+}
+
+.map-svg .node-initiative.on-shelf .glyph {
+  scale: 0.75;
+}
+
+.map-svg.narrow .node-initiative.on-shelf {
+  display: none;
+}
+
+/* Phones: the national box is a row of symbols; names show when selected. */
+.map-svg.narrow .node.on-shelf:not(.in-focus) .label {
+  opacity: 0;
+}
+
 /* On the map, labels are shown only where they fit (see views/labels.ts). */
 .map-svg .label {
   opacity: 0;
@@ -1575,8 +1597,27 @@ input:focus-visible + .check {
     display: none;
   }
 
+  .attribution-mobile {
+    display: block;
+    position: absolute;
+    right: 8px;
+    bottom: 66px;
+    margin: 0;
+    font-size: 10px;
+    color: var(--ink-soft);
+    text-shadow:
+      0 0 3px var(--halo),
+      0 0 3px var(--halo);
+    pointer-events: none;
+    z-index: 3;
+  }
+
+  body:not([data-view="map"]) .attribution-mobile {
+    display: none;
+  }
+
   .scale-bar {
-    bottom: 116px;
+    bottom: 76px;
   }
 
   .details-open .zoom-controls,
@@ -1585,7 +1626,7 @@ input:focus-visible + .check {
   }
 
   .zoom-controls {
-    bottom: 120px;
+    bottom: 76px;
   }
 
   .finder {

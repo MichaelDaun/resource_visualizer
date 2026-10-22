@@ -41,3 +41,19 @@ describe("Swedish place names", () => {
     expect(slug("Kronobergs län")).toBe("kronobergs-lan");
   });
 });
+
+describe("data and geography together", () => {
+  it("every `serves` entry names a known municipality", async () => {
+    const { dataset } = await import("../../src/data/dataset");
+    const unknown = dataset.initiatives.flatMap((i) => (i.serves ?? []).filter((name) => !geo.municipalityByName(name)));
+    expect(unknown).toEqual([]);
+  });
+
+  it("every located actor lies in Sweden", async () => {
+    const { dataset } = await import("../../src/data/dataset");
+    const outside = dataset.actors.flatMap((a) =>
+      (a.locations ?? []).filter((l) => !geo.locate(l.lat, l.lng).municipality).map((l) => `${a.id} @ ${l.place}`),
+    );
+    expect(outside).toEqual([]);
+  });
+});

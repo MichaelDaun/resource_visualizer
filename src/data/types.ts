@@ -80,6 +80,11 @@ export interface Initiative {
   lead: string;
   partners?: string[];
   funders?: string[];
+  /**
+   * Municipalities (by name, e.g. "Hultsfred") the initiative is meant for,
+   * when that differs from where its lead and partners are.
+   */
+  serves?: string[];
   example?: boolean;
 }
 

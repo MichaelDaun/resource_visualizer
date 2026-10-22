@@ -7,7 +7,7 @@ import { hashFor, readHash } from "../../src/router";
 import { search, searchNodes } from "../../src/ui/search";
 
 const geo = createGeoIndex(JSON.parse(readFileSync("public/geo/sweden.topo.json", "utf8")) as SwedenTopology);
-const graph = buildGraph(dataset, geo.locate);
+const graph = buildGraph(dataset, geo.locate, geo.municipalityByName);
 
 describe("search", () => {
   it("ranks name prefix matches first", () => {
@@ -15,8 +15,9 @@ describe("search", () => {
   });
 
   it("matches places and Swedish labels case-insensitively", () => {
-    const ids = searchNodes(graph, "VÄXJÖ").map((n) => n.id);
-    expect(ids).toContain("linnaeus-university");
+    expect(searchNodes(graph, "UNIVERSITET")[0].id).toBe("linnaeus-university");
+    // Places in descriptions and site lists match too.
+    expect(searchNodes(graph, "hultsfred").map((n) => n.id)).toContain("additive-tech-center");
     expect(searchNodes(graph, "hållbarhet").length).toBeGreaterThan(0);
   });
 

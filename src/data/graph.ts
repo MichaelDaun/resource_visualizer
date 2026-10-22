@@ -20,6 +20,9 @@ export type GraphNode =
 
 export type Locate = (lat: number, lng: number) => { county?: string; municipality?: string };
 
+/** Looks up a municipality by name ("Hultsfred"); used for initiatives' `serves`. */
+export type MunicipalityByName = (name: string) => { code: string; county: string } | undefined;
+
 export interface GraphEdge {
   id: string;
   source: string;
@@ -40,7 +43,11 @@ export interface Graph {
  * Turns the dataset into a graph. Initiatives have no coordinates of their
  * own; they are placed at the primary location of the actor that leads them.
  */
-export function buildGraph(data: Dataset, locate: Locate = () => ({})): Graph {
+export function buildGraph(
+  data: Dataset,
+  locate: Locate = () => ({}),
+  municipalityByName: MunicipalityByName = () => undefined,
+): Graph {
   const nodes: GraphNode[] = [];
   const edges: GraphEdge[] = [];
   const actorsById = new Map(data.actors.map((a) => [a.id, a]));
@@ -72,15 +79,21 @@ export function buildGraph(data: Dataset, locate: Locate = () => ({})): Graph {
     const lead = actorsById.get(initiative.lead);
     const involved = [initiative.lead, ...(initiative.partners ?? [])];
     const location = lead?.locations?.[0];
+    const served = (initiative.serves ?? []).flatMap((name) => {
+      const m = municipalityByName(name);
+      return m ? [m] : [];
+    });
     nodes.push({
       id: initiative.id,
       kind: "initiative",
       name: initiative.name,
       initiative,
       location,
-      counties: [...new Set(involved.flatMap((id) => actorCounties.get(id) ?? []))],
+      counties: [...new Set([...involved.flatMap((id) => actorCounties.get(id) ?? []), ...served.map((m) => m.county)])],
       municipality: location ? locate(location.lat, location.lng).municipality : undefined,
-      municipalities: [...new Set(involved.flatMap((id) => actorMunicipalities.get(id) ?? []))],
+      municipalities: [
+        ...new Set([...involved.flatMap((id) => actorMunicipalities.get(id) ?? []), ...served.map((m) => m.code)]),
+      ],
     });
     add(initiative.lead, initiative.id, "lead");
     for (const id of initiative.partners ?? []) add(id, initiative.id, "partner");

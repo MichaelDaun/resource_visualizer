@@ -23,8 +23,10 @@ import { labelBox, pickLabels, type Box, type LabelCandidate, type LabelSide } f
 import { applyHighlight, focusSet } from "./highlight";
 import { reducedMotion, type View } from "./view";
 
-const SHELF = { width: 212, margin: 16, rowHeight: 48, header: 40 };
+const SHELF = { width: 212, margin: 16, row: 32, rowWithItems: 46, itemStep: 19, itemsPerLine: 9, header: 40 };
 const NARROW = 720;
+/** Height of the national box when it runs along the bottom on phones. */
+const NARROW_SHELF = 62;
 /** Width of the details sheet on wide screens, kept clear when zooming to something. */
 const SHEET = 400;
 /** Height of the colophon strip along the bottom of the map. */
@@ -146,23 +148,46 @@ export function createMapView(container: HTMLElement, graph: Graph, store: Store
       .classed("z-roads", k >= 1.3)
       .classed("z-minor-roads", k >= 2.6)
       .classed("z-towns", k >= 1.6)
-      .classed("z-detail", k >= 2.2);
+      .classed("z-detail", k >= 2.2)
+      .classed("narrow", isNarrow());
+  }
+
+  /**
+   * The "Nationellt och EU" box: one row per actor, with the initiatives it
+   * leads as small symbols underneath (named on hover or selection).
+   */
+  function shelfRows(): { actor?: GraphNode; items: GraphNode[] }[] {
+    const off = visible.filter((n) => !n.location);
+    const actors = off.filter((n) => n.kind === "actor");
+    const ledBy = (id: string) => off.filter((n) => n.kind === "initiative" && n.initiative.lead === id);
+    const rows: { actor?: GraphNode; items: GraphNode[] }[] = actors.map((a) => ({ actor: a, items: ledBy(a.id) }));
+    const orphans = off.filter((n) => n.kind === "initiative" && !actors.some((a) => a.id === n.initiative.lead));
+    if (orphans.length > 0) rows.push({ items: orphans });
+    return rows;
+  }
+
+  function rowHeight(row: { actor?: GraphNode; items: GraphNode[] }): number {
+    if (!row.items.length) return SHELF.row;
+    const lines = Math.ceil(row.items.length / SHELF.itemsPerLine);
+    return (row.actor ? SHELF.rowWithItems : 26) + (lines - 1) * 18;
   }
 
   function shelfRect() {
     if (isNarrow()) {
-      const h = 96;
-      return { x: 0, y: height - h - COLOPHON, w: width, h };
+      const h = NARROW_SHELF;
+      // The colophon is hidden on phones, so the box sits at the very bottom.
+      return { x: 0, y: height - h, w: width, h };
     }
-    const count = visible.filter((n) => !n.location).length;
-    return { x: SHELF.margin, y: SHELF.margin, w: SHELF.width, h: SHELF.header + Math.max(1, count) * SHELF.rowHeight };
+    const rows = shelfRows();
+    const h = SHELF.header + rows.reduce((sum, r) => sum + rowHeight(r), 0) + 6;
+    return { x: SHELF.margin, y: SHELF.margin, w: SHELF.width, h: Math.max(SHELF.header + SHELF.row, h) };
   }
 
   /** The screen area not covered by the shelf, inset and colophon (and the details sheet, if open). */
   function freeArea(panelOpen: boolean): [[number, number], [number, number]] {
     const pad = 36;
     if (isNarrow()) {
-      const bottom = panelOpen ? height * 0.42 : height - (96 + COLOPHON);
+      const bottom = panelOpen ? height * 0.42 : height - NARROW_SHELF;
       return [
         [pad, pad],
         [width - pad, Math.max(pad + 40, bottom - pad)],
@@ -283,17 +308,33 @@ export function createMapView(container: HTMLElement, graph: Graph, store: Store
     return { x: sx, y: sy };
   }
 
-  function shelfPositions(nodes: GraphNode[]): Map<string, Point> {
+  function shelfPositions(): Map<string, Point> {
     const rect = shelfRect();
+    const rows = shelfRows();
     const result = new Map<string, Point>();
-    nodes.forEach((n, i) => {
-      if (isNarrow()) {
-        const step = rect.w / nodes.length;
-        result.set(n.id, { x: rect.x + step * (i + 0.5), y: rect.y + 36 });
-      } else {
-        result.set(n.id, { x: rect.x + 22, y: rect.y + SHELF.header + SHELF.rowHeight * (i + 0.5) - 4 });
-      }
-    });
+    if (isNarrow()) {
+      // Phones: actors in a row; their initiatives tuck in behind and are hidden in CSS.
+      const actors = rows.filter((r) => r.actor);
+      const step = rect.w / Math.max(1, actors.length);
+      actors.forEach((r, i) => {
+        const p = { x: rect.x + step * (i + 0.5), y: rect.y + 42 };
+        result.set(r.actor!.id, p);
+        for (const item of r.items) result.set(item.id, p);
+      });
+      for (const r of rows) if (!r.actor) for (const item of r.items) result.set(item.id, { x: -100, y: -100 });
+      return result;
+    }
+    let y = rect.y + SHELF.header;
+    for (const row of rows) {
+      if (row.actor) result.set(row.actor.id, { x: rect.x + 22, y: y + 12 });
+      const top = row.actor ? y + 30 : y + 10;
+      row.items.forEach((item, j) => {
+        const line = Math.floor(j / SHELF.itemsPerLine);
+        const col = j % SHELF.itemsPerLine;
+        result.set(item.id, { x: rect.x + 40 + col * SHELF.itemStep, y: top + line * 18 });
+      });
+      y += rowHeight(row);
+    }
     return result;
   }
 
@@ -302,7 +343,7 @@ export function createMapView(container: HTMLElement, graph: Graph, store: Store
    * Initiatives orbit the actor that leads them.
    */
   function layout(ticks: number) {
-    const shelf = shelfPositions(visible.filter((n) => !n.location));
+    const shelf = shelfPositions();
     const items: LayoutNode[] = visible.map((node, i) => {
       if (!node.location) {
         const p = shelf.get(node.id)!;
@@ -324,7 +365,10 @@ export function createMapView(container: HTMLElement, graph: Graph, store: Store
       .force("y", forceY<LayoutNode>((d) => d.ay).strength((d) => (d.node.kind === "actor" ? 0.2 : 0.03)))
       .force(
         "collide",
-        forceCollide<LayoutNode>((d) => nodeRadius(d.node) + (d.node.kind === "actor" ? 14 : 7)).iterations(3),
+        // Initiatives are drawn smaller in the overview (see CSS), so they pack tighter.
+        forceCollide<LayoutNode>((d) =>
+          d.node.kind === "actor" ? nodeRadius(d.node) + 14 : nodeRadius(d.node) * (transform.k < 2.2 ? 0.8 : 1) + 6,
+        ).iterations(3),
       )
       .force(
         "link",
@@ -484,7 +528,7 @@ export function createMapView(container: HTMLElement, graph: Graph, store: Store
       .data(hasShelf ? [rect] : [])
       .join("text")
       .attr("x", (r) => r.x + 14)
-      .attr("y", (r) => r.y + 25)
+      .attr("y", (r) => r.y + (isNarrow() ? 20 : 25))
       .text(t.offMapColumn);
   }
 
@@ -653,7 +697,10 @@ export function createMapView(container: HTMLElement, graph: Graph, store: Store
     // Labels must stay clear of the details sheet when it is open.
     const sheetOpen = !isNarrow() && (store.state.selected !== null || store.state.place !== null);
     const shown = pickLabels(candidates, obstacles.map(candidate), { width: sheetOpen ? width - SHEET : width, height });
-    for (const n of visible) if (!n.location) shown.set(n.id, "right");
+    // In the national box actors are always named; their initiatives when in focus.
+    for (const n of visible) {
+      if (!n.location && (n.kind === "actor" || focusNodes?.has(n.id))) shown.set(n.id, "right");
+    }
     // Space taken by node labels and symbols, so town names can be placed around them.
     const boxes: Box[] = candidates.filter((c) => shown.has(c.id)).map((c) => labelBox(c, shown.get(c.id) as LabelSide));
     for (const n of onMap) {

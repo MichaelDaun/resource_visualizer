@@ -101,7 +101,7 @@ export function createNetworkView(container: HTMLElement, graph: Graph, store: S
           .distance((l) => LINK_DISTANCE[l.edge.type])
           .strength(0.6),
       )
-      .force("charge", forceManyBody<SimNode>().strength(-700))
+      .force("charge", forceManyBody<SimNode>().strength(-520).distanceMax(420))
       // Labels sit below nodes, so give each node room for roughly half its label width.
       .force(
         "collide",
@@ -110,8 +110,8 @@ export function createNetworkView(container: HTMLElement, graph: Graph, store: S
           return Math.max(nodeRadius(d.node) + 30, Math.min(78, longest * 3.6 + 8));
         }).iterations(2),
       )
-      .force("x", forceX(0).strength(0.05))
-      .force("y", forceY(0).strength(0.07))
+      .force("x", forceX(0).strength(0.09))
+      .force("y", forceY(0).strength(0.13))
       .on("tick", tick);
     if (!fitted) {
       // Settle the first layout off-screen so the graph doesn't open in a tangle.

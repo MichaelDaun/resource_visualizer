@@ -10,6 +10,23 @@ relations between them – on a map of Kalmar län and as a network graph. The
 owner works with SME support at Linnéuniversitetet (e.g. the DIKA project).
 Priorities: clear relations, a stylish look, easy data editing for non-developers.
 
+## Design language
+
+The owner explicitly does not want the generic "AI-built app" look. Keep to a
+cartographic, editorial style:
+
+- No pill-shaped chips, floating badges, soft rounded cards or toast-like
+  hints. Use legend rows, text tabs, hairline rules and plain typography.
+- Small radii (2–3px), 1px hairlines (`--line`), 1.5–2px rules (`--rule`) under
+  section headings. Avoid drop shadows except where needed for separation.
+- Hierarchy through type: Bricolage Grotesque (display), Atkinson Hyperlegible
+  Next (text), Instrument Serif italic only for water names on the map. Avoid
+  tiny tracked uppercase labels in the UI (fine for municipality names on the map).
+- Two modes of one design: Midsommar (light) and Natt (dark). Every colour comes
+  from the theme's custom properties.
+- Animations are short and purposeful (entrance, selection pulse, funding flow,
+  eased zoom) and respect `prefers-reduced-motion`.
+
 ## Conventions
 
 - Code, comments, commit messages and docs: **English**.
@@ -51,16 +68,22 @@ phone (412×860) widths, and the map view and the network view.
   place spread out (initiatives orbit their lead actor). Label collisions are handled by
   `src/views/labels.ts`. Actors without coordinates go in the "Nationellt & EU" box.
 - `src/views/network-view.ts`: d3-force graph.
-- `src/router.ts`: URL hash `#/karta/<id>`, `#/natverk/<id>`, `#/karta/plats/<place-id>`.
-- Themes: `?tema=fjord|midsommar|natt`; switching reloads the page so every drawn element
-  picks up the new colours.
+- `src/views/finder-view.ts` + `src/finder.ts`: "Hitta stöd" – ranks ongoing/planned initiatives by
+  matched needs and reach (in the municipality → in the county → national).
+- Basemaps: `public/geo/sweden.topo.json` (coarse, loaded first) and `public/geo/detail.topo.json`
+  (OSM/OpenFreeMap + Nominatim + SCB, both counties, loaded in the background and swapped in via
+  `mapView.setDetail()`). Rebuild with `npm run geo` and `npm run geo:detail -- <cache-dir>`.
+- When a place is selected, the map draws only nodes in that place (plus national ones and the
+  selection's neighbours) so clusters from nearby towns don't spill over.
+- `src/router.ts`: URL hash `#/karta/<id>`, `#/natverk/<id>`, `#/karta/plats/<place-id>`, `#/hitta`.
+- Themes: `?tema=midsommar|natt` (default follows the system); switching reloads the page so
+  every drawn element picks up the new colours.
 - Home counties: Kalmar (08) and Kronoberg (07), see `HOME_COUNTIES` in `src/geo.ts`.
 
 ## Environment notes
 
-- Cloud sessions cannot reach map tile servers, which is one reason the basemap is self-hosted.
-  raw.githubusercontent.com, media.githubusercontent.com, PyPI and the npm registry are
-  reachable; most other sites (lnu.se, scb.se…) are not unless allowed in the environment's
-  network settings. WebSearch works for research.
+- The environment's network is open: OpenFreeMap, Nominatim, SCB and regional sites are
+  reachable. lnu.se answers 403 to scripts; use WebSearch for it. Node's `fetch` does not use
+  the proxy, so build scripts download with `curl`. Respect Nominatim's one-request-per-second rule.
 - Deploying to Pages is manual (workflow_dispatch on `main`, or repo variable `DEPLOY_ON_PUSH=true`).
   Work on a feature branch and open a PR into `main`.

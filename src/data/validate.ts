@@ -101,7 +101,23 @@ export function validateDataset(raw: { actors: unknown; initiatives: unknown; re
     registerId(p, where);
     knownKeys(
       p,
-      ["id", "name", "kind", "status", "description", "website", "start", "end", "supportTypes", "area", "lead", "partners", "funders", "example"],
+      [
+        "id",
+        "name",
+        "kind",
+        "status",
+        "description",
+        "website",
+        "start",
+        "end",
+        "supportTypes",
+        "area",
+        "lead",
+        "partners",
+        "funders",
+        "serves",
+        "example",
+      ],
       where,
     );
     requireString(p, "name", where);
@@ -127,6 +143,10 @@ export function validateDataset(raw: { actors: unknown; initiatives: unknown; re
       }
     }
     if (!actorIds.has(p.lead as string)) err(where, `"lead" refers to unknown actor ${JSON.stringify(p.lead)}`);
+    const serves = p.serves;
+    if (serves !== undefined && (!Array.isArray(serves) || serves.some((v) => typeof v !== "string"))) {
+      err(where, `"serves" must be a list of municipality names, e.g. [Hultsfred, Vimmerby]`);
+    }
     for (const key of ["partners", "funders"]) {
       for (const id of idList(p, key, where)) {
         if (!actorIds.has(id)) err(where, `"${key}" refers to unknown actor "${id}"`);

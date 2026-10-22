@@ -56,6 +56,8 @@ export interface GeoIndex {
   placeById: Map<string, Place>;
   /** County and municipality codes at a coordinate, if it is inside Sweden. */
   locate(lat: number, lng: number): { county?: string; municipality?: string };
+  /** Finds a municipality by its short name, e.g. "Hultsfred". */
+  municipalityByName(name: string): { code: string; county: string } | undefined;
 }
 
 /** Max distance (radians, about 12 km) for snapping coastal points to the simplified borders. */
@@ -155,6 +157,10 @@ export function createGeoIndex(topo: SwedenTopology): GeoIndex {
     ),
     places,
     placeById: new Map(places.map((p) => [p.id, p])),
+    municipalityByName(name) {
+      const f = municipalities.features.find((m) => m.properties.name === name);
+      return f ? { code: f.properties.code, county: f.properties.county } : undefined;
+    },
     locate(lat, lng) {
       const point: [number, number] = [lng, lat];
       const m = municipalities.features.find((f) => geoContains(f, point)) ?? nearest(municipalities.features, point);
