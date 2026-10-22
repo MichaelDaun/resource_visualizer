@@ -7,7 +7,7 @@ sister projects.
 
 The tool itself is in Swedish; code and documentation are in English.
 
-**Live site:** https://michaeldaun.github.io/resource_visualizer/
+**Site (once published):** https://michaeldaun.github.io/resource_visualizer/
 
 ![Map view](docs/screenshot-map.png)
 
@@ -26,8 +26,7 @@ The tool itself is in Swedish; code and documentation are in English.
 
 All content is in [`/data`](data) as YAML files that can be edited directly on
 GitHub. See [docs/DATA.md](docs/DATA.md) for every field and allowed value. Each
-change is validated automatically, and once it is merged to `main` the site
-updates within a couple of minutes.
+change is validated automatically.
 
 The current data is **demo content**: the actors are real organisations, but
 projects marked `example: true` are invented or incomplete.
@@ -63,9 +62,11 @@ service or API key.
 
 ## Deployment
 
-Every push to `main` runs the checks and deploys to GitHub Pages via
-[`.github/workflows/ci.yml`](.github/workflows/ci.yml). Pull requests run the same
-checks without deploying.
+Pull requests and pushes to `main` run the checks in
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml). Publishing to GitHub
+Pages is manual for now: run the workflow from the **Actions** tab on `main`. To
+deploy automatically on every push to `main`, add the repository variable
+`DEPLOY_ON_PUSH` with the value `true` (Settings → Secrets and variables → Actions).
 
 One-time setup: in the repository settings, under **Pages**, set **Source** to
 **GitHub Actions**.

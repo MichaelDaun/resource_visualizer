@@ -53,4 +53,5 @@ phone (412×860) widths, and the map view and the network view.
 
 - Cloud sessions cannot reach map tile servers, which is one reason the basemap is self-hosted.
   raw.githubusercontent.com and the npm registry are reachable.
-- Pushing to `main` deploys to Pages. Work on a feature branch and open a PR.
+- Deploying to Pages is manual (workflow_dispatch on `main`, or repo variable `DEPLOY_ON_PUSH=true`).
+  Work on a feature branch and open a PR into `main`.

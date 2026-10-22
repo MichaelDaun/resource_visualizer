@@ -42,14 +42,17 @@ jobs:
           path: test-results/
           retention-days: 7
       - uses: actions/upload-pages-artifact@v3
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' && (github.event_name == 'workflow_dispatch' || vars.DEPLOY_ON_PUSH == 'true')
         with:
           path: dist
 
+  # Publishing is manual until the site is ready: run this workflow from the
+  # Actions tab, or set the repository variable DEPLOY_ON_PUSH=true to deploy
+  # on every push to main.
   deploy:
     name: Deploy to GitHub Pages
     needs: check
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'workflow_dispatch' || vars.DEPLOY_ON_PUSH == 'true')
     runs-on: ubuntu-latest
     permissions:
       pages: write
