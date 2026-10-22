@@ -1,38 +1,95 @@
 import { otherEnd, type Graph, type GraphEdge, type GraphNode } from "../data/graph";
-import type { Initiative } from "../data/types";
+import type { Initiative, Status } from "../data/types";
+import type { GeoIndex, Place } from "../geo";
 import { t } from "../i18n/sv";
-import type { Store } from "../state";
+import { isNodeVisible, type Store } from "../state";
 import { nodeColor } from "../theme";
 import { esc, safeUrl } from "./dom";
 
-/** Side panel with details and clickable relations for the selected node. */
-export function mountDetails(panel: HTMLElement, graph: Graph, store: Store) {
+/**
+ * Side panel with details and clickable relations for the selected node, or
+ * an overview of the selected place when no node is selected.
+ */
+export function mountDetails(panel: HTMLElement, graph: Graph, geo: GeoIndex, store: Store) {
+  // Closing a node returns to the place it was opened from; closing a place clears it.
+  const close = () =>
+    store.state.selected ? store.update({ selected: null }) : store.update({ place: null });
+
   panel.addEventListener("click", (event) => {
-    const target = (event.target as Element).closest<HTMLElement>("[data-select], [data-close]");
+    const target = (event.target as Element).closest<HTMLElement>("[data-select], [data-close], [data-place]");
     if (!target) return;
-    if (target.dataset.close !== undefined) store.update({ selected: null });
+    if (target.dataset.close !== undefined) close();
+    else if (target.dataset.place !== undefined) store.update({ place: target.dataset.place, selected: null });
     else store.update({ selected: target.dataset.select! });
   });
   panel.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") store.update({ selected: null });
+    if (event.key === "Escape") close();
   });
 
   const render = () => {
     const node = store.state.selected ? graph.byId.get(store.state.selected) : undefined;
-    panel.hidden = !node;
-    document.body.classList.toggle("details-open", Boolean(node));
-    if (!node) {
+    const place = store.state.place ? geo.placeById.get(store.state.place) : undefined;
+    const open = Boolean(node || place);
+    panel.hidden = !open;
+    document.body.classList.toggle("details-open", open);
+    if (!open) {
       panel.replaceChildren();
       return;
     }
-    panel.innerHTML = node.kind === "actor" ? actorHtml(graph, node) : initiativeHtml(graph, node);
+    const back = node && place ? backLink(place) : "";
+    panel.innerHTML =
+      back +
+      (node
+        ? node.kind === "actor"
+          ? actorHtml(graph, node)
+          : initiativeHtml(graph, node)
+        : placeHtml(graph, geo, place!, store));
     panel.scrollTop = 0;
   };
 
   store.subscribe((state, prev) => {
-    if (state.selected !== prev.selected) render();
+    if (state.selected !== prev.selected || state.place !== prev.place || state.filters !== prev.filters) render();
   });
   render();
+}
+
+function backLink(place: Place): string {
+  return `<button class="back-link" data-place="${esc(place.id)}">← ${esc(place.name)}</button>`;
+}
+
+function inPlace(node: GraphNode, place: Place): boolean {
+  return node.municipalities.some((m) => place.municipalities.includes(m));
+}
+
+function placeHtml(graph: Graph, geo: GeoIndex, place: Place, store: Store): string {
+  const here = graph.nodes.filter((n) => inPlace(n, place) && isNodeVisible(n, store.state.filters));
+  const actors = here.filter((n) => n.kind === "actor");
+  const initiatives = here.filter((n): n is Extract<GraphNode, { kind: "initiative" }> => n.kind === "initiative");
+  const withStatus = (status: Status) =>
+    initiatives.filter((n) => n.initiative.status === status).map((n) => nodeLink(graph, n.id));
+
+  // Neighbouring places to jump to: the municipalities of a county or area, or the
+  // county and areas a municipality belongs to.
+  const related =
+    place.kind === "municipality"
+      ? geo.places.filter(
+          (p) => p.id !== place.id && p.kind !== "municipality" && p.municipalities.includes(place.municipalities[0]),
+        )
+      : geo.places.filter((p) => p.kind === "municipality" && place.municipalities.includes(p.municipalities[0]));
+
+  return `
+    <div class="details-header">
+      <div class="chips">${chip(t.places.kinds[place.kind])}</div>
+      <button class="icon-btn" data-close aria-label="${esc(t.close)}" title="${esc(t.close)}">✕</button>
+    </div>
+    <h2>${esc(place.name)}</h2>
+    <p class="place-summary">${esc(t.places.summary(actors.length, initiatives.length))}</p>
+    ${related.length ? `<div class="place-chips">${related.map((p) => `<button class="place-chip" data-place="${esc(p.id)}">${esc(p.name)}</button>`).join("")}</div>` : ""}
+    ${here.length === 0 ? `<p class="description"><em>${esc(t.places.nothingHere)}</em></p>` : ""}
+    ${section(t.sections.offersNow, withStatus("ongoing"))}
+    ${section(t.sections.planned, withStatus("planned"))}
+    ${section(t.places.actorsHere, actors.map((n) => nodeLink(graph, n.id)))}
+    ${section(t.sections.completed, withStatus("completed"))}`;
 }
 
 function header(node: GraphNode, chips: string[]): string {
@@ -100,6 +157,13 @@ function actorHtml(graph: Graph, node: Extract<GraphNode, { kind: "actor" }>): s
   const a = node.actor;
   const outgoing = (type: GraphEdge["type"]) =>
     edgesOf(graph, a.id, (e) => e.type === type && e.source === a.id).map((e) => nodeLink(graph, e.target));
+  const ledWithStatus = (status: Status) =>
+    edgesOf(graph, a.id, (e) => e.type === "lead" && e.source === a.id)
+      .filter((e) => {
+        const n = graph.byId.get(e.target);
+        return n?.kind === "initiative" && n.initiative.status === status;
+      })
+      .map((e) => nodeLink(graph, e.target));
 
   const relationItems = edgesOf(graph, a.id, (e) => e.type === "owns" || e.type === "manages" || e.type === "collaborates").map(
     (e) => {
@@ -115,10 +179,12 @@ function actorHtml(graph: Graph, node: Extract<GraphNode, { kind: "actor" }>): s
     ${description(a.description)}
     ${facts([[t.locations, a.locations?.map((l) => l.place).join(", ") ?? t.offMapColumn]])}
     ${websiteLink(a.website)}
-    ${section(t.sections.leads, outgoing("lead"))}
+    ${section(t.sections.offersNow, ledWithStatus("ongoing"))}
+    ${section(t.sections.planned, ledWithStatus("planned"))}
     ${section(t.sections.funds, outgoing("funds"))}
     ${section(t.sections.partnerIn, outgoing("partner"))}
-    ${section(t.sections.relations, relationItems)}`;
+    ${section(t.sections.relations, relationItems)}
+    ${section(t.sections.completed, ledWithStatus("completed"))}`;
 }
 
 function period(i: Initiative): string | undefined {
@@ -128,7 +194,9 @@ function period(i: Initiative): string | undefined {
 
 function initiativeHtml(graph: Graph, node: Extract<GraphNode, { kind: "initiative" }>): string {
   const i = node.initiative;
-  const related = edgesOf(graph, i.id, (e) => e.type === "related").map((e) => nodeLink(graph, otherEnd(e, i.id)));
+  const sameLead = edgesOf(graph, i.lead, (e) => e.type === "lead" && e.source === i.lead && e.target !== i.id).map(
+    (e) => nodeLink(graph, e.target),
+  );
   return `
     ${header(node, [chip(t.kinds[i.kind], nodeColor(node)), chip(t.statuses[i.status])])}
     ${exampleNotice(i.example)}
@@ -142,5 +210,5 @@ function initiativeHtml(graph: Graph, node: Extract<GraphNode, { kind: "initiati
     ${section(t.sections.ledBy, [nodeLink(graph, i.lead)])}
     ${section(t.sections.funders, (i.funders ?? []).map((id) => nodeLink(graph, id)))}
     ${section(t.sections.partners, (i.partners ?? []).map((id) => nodeLink(graph, id)))}
-    ${section(t.sections.related, related)}`;
+    ${section(t.sections.sameLead, sameLead)}`;
 }

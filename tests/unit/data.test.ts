@@ -23,12 +23,11 @@ describe("validateDataset", () => {
   it("reports unknown references", () => {
     const errors = validateDataset({
       actors: [actor],
-      initiatives: [{ ...initiative, lead: "missing", funders: ["nope"], related: ["ghost"] }],
+      initiatives: [{ ...initiative, lead: "missing", funders: ["nope"] }],
       relations: [{ from: "a", to: "zzz", type: "owns" }],
     });
     expect(errors.join("\n")).toMatch(/lead.*missing/);
     expect(errors.join("\n")).toMatch(/funders.*nope/);
-    expect(errors.join("\n")).toMatch(/related.*ghost/);
     expect(errors.join("\n")).toMatch(/to.*zzz/);
   });
 

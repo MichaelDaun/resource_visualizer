@@ -17,12 +17,20 @@ export const sv = {
   filters: "Filter",
   filterSupportTypes: "Typ av stöd",
   filterStatus: "Status",
-  filterKinds: "Insatser",
+  filterKinds: "Typ av insats",
   filterActorTypes: "Aktörer",
   clearFilters: "Visa allt",
   legend: "Förklaring",
   legendNodes: "Noder",
   legendActor: "Aktör (färgen visar typ)",
+  legendInitiative: "Insats (färgen visar typ)",
+  themeMenu: "Utseende",
+  themes: { fjord: "Fjord", midsommar: "Midsommar", natt: "Natt" } as Record<string, string>,
+  themeDescriptions: {
+    fjord: "Ljust och skarpt",
+    midsommar: "Varmt och lekfullt",
+    natt: "Mörkt och lysande",
+  } as Record<string, string>,
   legendRelations: "Relationer",
   offMapColumn: "Nationellt & EU",
   close: "Stäng",
@@ -31,23 +39,37 @@ export const sv = {
   area: "Område",
   period: "Period",
   supportTypes: "Typ av stöd",
-  exampleNotice: "Uppgifterna är påhittade eller ofullständiga exempel.",
+  exampleNotice: "Uppgifterna är ofullständiga eller inte kontrollerade ännu.",
   noDescription: "Ingen beskrivning ännu.",
-  emptyHint: "Klicka på en nod för att se detaljer och relationer.",
+  emptyHint: "Klicka på en nod eller en kommun för att se vad som finns där.",
   countVisible: (shown: number, total: number) => `${shown} av ${total} noder visas`,
   zoomIn: "Zooma in",
   zoomOut: "Zooma ut",
   zoomReset: "Återställ vy",
   toggleFilters: "Filter och förklaring",
 
+  places: {
+    oland: "Öland",
+    kinds: { county: "Län", municipality: "Kommun", area: "Område" },
+    actorsHere: "Aktörer här",
+    initiativesHere: "Insatser här",
+    nothingHere: "Inga aktörer eller insatser registrerade här ännu.",
+    summary: (actors: number, initiatives: number) =>
+      `${actors} ${actors === 1 ? "aktör" : "aktörer"} · ${initiatives} ${initiatives === 1 ? "insats" : "insatser"}`,
+    zoomHint: "Klicka på en kommun för att zooma in.",
+  },
+  filterCounties: "Län",
+
   sections: {
-    leads: "Driver",
     partnerIn: "Partner i",
     funds: "Finansierar",
     ledBy: "Drivs av",
     funders: "Finansiärer",
     partners: "Partner",
-    related: "Systerinsatser",
+    sameLead: "Fler insatser från samma aktör",
+    offersNow: "Erbjuder nu",
+    planned: "Planerat",
+    completed: "Avslutat",
     relations: "Relationer",
   },
 
@@ -56,7 +78,7 @@ export const sv = {
     municipality: "Kommun",
     university: "Lärosäte",
     "business-support": "Företagsfrämjare",
-    "science-park": "Science park / inkubator",
+    "science-park": "Innovationsmiljö",
     "research-institute": "Forskningsinstitut",
     "public-agency": "Myndighet",
     "eu-fund": "EU-fond",
@@ -66,7 +88,9 @@ export const sv = {
 
   kinds: {
     project: "Projekt",
-    service: "Löpande stöd",
+    service: "Löpande tjänst",
+    funding: "Bidrag & utlysning",
+    programme: "Program",
   } satisfies Record<InitiativeKind, string>,
 
   statuses: {
@@ -90,7 +114,6 @@ export const sv = {
     lead: "Driver",
     partner: "Partner",
     funds: "Finansierar",
-    related: "Systerinsats",
     owns: "Äger / delägare",
     manages: "Förvaltar",
     collaborates: "Samverkar",
@@ -105,3 +128,18 @@ export const sv = {
 };
 
 export const t = sv;
+
+/** Swedish genitive for place names, e.g. Hultsfred → Hultsfreds. */
+function genitive(name: string): string {
+  if (GENITIVE_EXCEPTIONS[name]) return GENITIVE_EXCEPTIONS[name];
+  return /[aeiouyåäös]$/i.test(name) ? name : `${name}s`;
+}
+const GENITIVE_EXCEPTIONS: Record<string, string> = { Kalmar: "Kalmar", Falun: "Falu" };
+
+export function municipalityName(name: string): string {
+  return `${genitive(name)} kommun`;
+}
+
+export function countyName(name: string): string {
+  return `${genitive(name)} län`;
+}

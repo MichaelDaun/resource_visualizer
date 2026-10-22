@@ -34,19 +34,19 @@ or OpenStreetMap and copy the latitude and longitude.
 | `municipality`       | Kommun                   |
 | `university`         | Lärosäte                 |
 | `business-support`   | Företagsfrämjare         |
-| `science-park`       | Science park / inkubator |
+| `science-park`       | Innovationsmiljö (science park, inkubator, teknikcenter) |
 | `research-institute` | Forskningsinstitut       |
 | `public-agency`      | Myndighet                |
 | `eu-fund`            | EU-fond                  |
 | `network`            | Nätverk / förening       |
 | `other`              | Övrig aktör              |
 
-## `initiatives.yaml` – projects and services
+## `initiatives.yaml` – support initiatives
 
 ```yaml
 - id: dika
   name: DIKA
-  kind: project                # project (time-limited) or service (ongoing offering)
+  kind: project                # project, service, funding or programme – see below
   status: ongoing              # planned, ongoing or completed
   description: Vad insatsen erbjuder och till vem.   # optional
   website: https://…                                  # optional
@@ -57,13 +57,26 @@ or OpenStreetMap and copy the latitude and longitude.
   lead: linnaeus-university    # actor id of who runs it (required)
   partners: [almi-kalmar]      # optional actor ids
   funders: [region-kalmar, eu-erdf]                   # optional actor ids
-  related: [sister-project-a]  # optional ids of sister initiatives
   example: true                # optional
 ```
 
-On the map, an initiative is placed next to the main location of its `lead`.
+On the map, an initiative is placed next to the main location of its `lead`. The
+details panel lists other initiatives from the same lead automatically.
 
-A sister relation only needs to be listed on one of the two initiatives.
+| `kind`      | Shown as           | Use for                                                   |
+| ----------- | ------------------ | --------------------------------------------------------- |
+| `project`   | Projekt            | Time-limited efforts, often externally funded             |
+| `service`   | Löpande tjänst     | Ongoing offerings: loans, advice, test beds, equipment    |
+| `funding`   | Bidrag & utlysning | Grants, vouchers and calls that companies apply for       |
+| `programme` | Program            | Structured courses such as incubators and accelerators    |
+
+## Counties and municipalities
+
+You never enter a county or municipality: they are worked out from the
+coordinates. An actor belongs to every county it has a location in; an
+initiative belongs to the counties of its lead and partners. This drives the
+"Län" filter and the overview shown when someone clicks a municipality. Actors
+without `locations` are shown whichever county is selected.
 
 | `supportTypes`         | Shown as             |
 | ---------------------- | -------------------- |

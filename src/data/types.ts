@@ -17,8 +17,13 @@ export const ACTOR_TYPES = [
 ] as const;
 export type ActorType = (typeof ACTOR_TYPES)[number];
 
-export const INITIATIVE_KINDS = ["project", "service"] as const;
-/** "project" is time-limited; "service" is an ongoing offering such as loans or advice. */
+export const INITIATIVE_KINDS = ["project", "service", "funding", "programme"] as const;
+/**
+ * - project: time-limited, often externally funded effort
+ * - service: ongoing offering such as loans, advice or test beds
+ * - funding: grants, vouchers or calls that companies apply for
+ * - programme: a structured course such as an incubator or accelerator
+ */
 export type InitiativeKind = (typeof INITIATIVE_KINDS)[number];
 
 export const STATUSES = ["planned", "ongoing", "completed"] as const;
@@ -75,8 +80,6 @@ export interface Initiative {
   lead: string;
   partners?: string[];
   funders?: string[];
-  /** Ids of sister initiatives. The relation is symmetric; list it on one side only. */
-  related?: string[];
   example?: boolean;
 }
 

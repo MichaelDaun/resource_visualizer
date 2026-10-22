@@ -1,48 +1,77 @@
-# Projects (time-limited) and services (ongoing offerings) aimed at SMEs.
+# Support aimed at SMEs: projects (time-limited), services (ongoing offerings),
+# funding (grants and calls) and programmes (e.g. incubators).
 # See docs/DATA.md for all fields and allowed values.
+#
+# Entries marked `example: true` have details that are guessed or not yet checked.
+
+# --- Linnéuniversitetet ---
 
 - id: dika
-  name: DIKA
+  name: DiKa
   kind: project
   status: ongoing
-  description: Projekt vid Linnéuniversitetet riktat till små och medelstora företag. Beskrivning, period och stödtyper är platshållare som ska kompletteras.
+  description: Digital kapacitet och datadriven utveckling för små och medelstora företag i Kalmar län. Period och detaljer ska kompletteras.
   supportTypes: [digitalisation, skills]
   area: Kalmar län
   lead: linnaeus-university
   funders: [region-kalmar, eu-erdf]
+  website: https://www.lnu.se/en/meet-linnaeus-university/Organisation/faculty-of-technology/research/
   example: true
 
-- id: sister-project-a
-  name: Systerprojekt A
+- id: smart-dat
+  name: Smart Dat
   kind: project
   status: ongoing
-  description: Påhittat exempel på ett systerprojekt med fokus på hållbar omställning i små företag.
-  start: "2024-03"
-  end: "2027-02"
-  supportTypes: [sustainability, advisory]
-  area: Kalmar län
+  description: Projekt vid Linnéuniversitetet för datadriven utveckling i små och medelstora företag.
+  start: "2023-09"
+  end: "2026-12"
+  supportTypes: [digitalisation, innovation]
+  area: Kalmar och Kronobergs län
   lead: linnaeus-university
-  partners: [almi-kalmar]
-  funders: [eu-erdf, region-kalmar]
-  related: [dika]
-  example: true
+  funders: [eu-erdf, tillvaxtverket, region-kalmar, region-kronoberg]
+  website: https://www.lnu.se/en/research/research-projects/project-smart-dat/
 
-- id: sister-project-b
-  name: Systerprojekt B
+- id: hpc-sme
+  name: HPC för SMF
   kind: project
-  status: planned
-  description: Påhittat exempel på ett kommande innovationsprojekt tillsammans med kommuner i norra länet.
-  start: "2026-01"
-  end: "2028-12"
-  supportTypes: [innovation, networking]
-  area: Norra Kalmar län
+  status: ongoing
+  description: Ger små och medelstora företag tillgång till högpresterande beräkningar (HPC) och kompetens att använda dem.
+  supportTypes: [digitalisation, innovation]
+  area: Kalmar och Kronobergs län
   lead: linnaeus-university
-  partners: [vastervik-municipality, oskarshamn-municipality]
-  funders: [vinnova]
-  related: [dika, sister-project-a]
+  funders: [eu-erdf, tillvaxtverket, region-kalmar, region-kronoberg]
+  website: https://lnu.se/mot-linneuniversitetet/Organisation/fakulteten-for-teknik/stod-for-sma-och-medelstora-foretag-i-linneregionen-for-att-starka-teknisk-kompetens-och-konkurrenskraft/
   example: true
 
-- id: almi-loans-advice
+- id: iot-lab-sme
+  name: IoT-lab för SMF 2.0
+  kind: project
+  status: ongoing
+  description: Labbmiljö där små och medelstora företag kan testa och utveckla lösningar med sakernas internet (IoT).
+  supportTypes: [digitalisation, innovation]
+  area: Kalmar och Kronobergs län
+  lead: linnaeus-university
+  funders: [eu-erdf, tillvaxtverket, region-kalmar, region-kronoberg]
+  website: https://lnu.se/mot-linneuniversitetet/Organisation/fakulteten-for-teknik/stod-for-sma-och-medelstora-foretag-i-linneregionen-for-att-starka-teknisk-kompetens-och-konkurrenskraft/
+  example: true
+
+- id: cee
+  name: CEE – Center for Energy and Environment
+  kind: project
+  status: ongoing
+  description: Treårigt projekt för cirkulär ekonomi och energieffektivisering. Företag får skräddarsydd rådgivning, tillgång till forskning, workshops och samarbete i demonstrationsprojekt.
+  start: "2025-01"
+  end: "2028-05"
+  supportTypes: [sustainability, advisory, networking]
+  area: Kalmar och Kronobergs län
+  lead: linnaeus-university
+  partners: [godahus]
+  funders: [tillvaxtverket, region-kalmar, region-kronoberg]
+  website: https://www.lnu.se/en/meet-linnaeus-university/collaborate-with-us/projects-and-networks/project-cee--centre-for-energy-and-environment/
+
+# --- Kalmar län ---
+
+- id: almi-kalmar-loans-advice
   name: Lån och affärsrådgivning
   kind: service
   status: ongoing
@@ -51,42 +80,72 @@
   area: Kalmar län
   lead: almi-kalmar
 
-- id: regional-business-grants
-  name: Regionala företagsstöd
-  kind: service
+- id: kalmar-incubator
+  name: Inkubatorn vid Kalmar Science Park
+  kind: programme
   status: ongoing
-  description: Exempel på regionala stöd till företag för investeringar och utvecklingsinsatser.
+  description: Affärsutveckling för idébärare och nystartade företag. Vinnova har utsett inkubatorn till en av landets kvalitetsgranskade inkubatorer.
+  supportTypes: [innovation, advisory]
+  area: Kalmar län
+  lead: kalmar-science-park
+  partners: [linnaeus-university]
+  funders: [vinnova, region-kalmar]
+
+- id: regional-business-grants-kalmar
+  name: Regionala företagsstöd
+  kind: funding
+  status: ongoing
+  description: Stöd som företag kan söka hos regionen, till exempel för investeringar och utveckling. Villkor och belopp ska kompletteras.
   supportTypes: [financing, innovation]
   area: Kalmar län
   lead: region-kalmar
-  funders: [tillvaxtverket]
   example: true
 
-- id: energy-efficiency-smes
-  name: Energieffektiva småföretag
+- id: atc-services
+  name: 3D-printing och uppdragsutbildning
+  kind: service
+  status: ongoing
+  description: Företag kan använda centrets 3D-skrivare för plast och metall, beställa utskrifter och skräddarsydda utbildningar, till exempel i CAD och mätteknik.
+  supportTypes: [innovation, skills]
+  area: Kalmar län
+  lead: additive-tech-center
+
+- id: circular-additive
+  name: Cirkulär additiv tillverkning
   kind: project
   status: ongoing
-  description: Påhittat exempel på ett projekt för energikartläggning i små och medelstora företag.
-  start: "2023-09"
-  end: "2026-08"
-  supportTypes: [sustainability, advisory]
-  area: Sydöstra Sverige
-  lead: energy-agency-southeast
-  partners: [region-kalmar, kalmar-municipality]
-  funders: [eu-erdf]
+  description: Projekt där industrins restflöden testas som råvara för storskalig 3D-printing. EU-finansierat; period ska kompletteras.
+  supportTypes: [sustainability, innovation]
+  area: Kalmar län
+  lead: additive-tech-center
   example: true
 
-- id: digital-boost
-  name: Digitaliseringslyftet
-  kind: project
-  status: completed
-  description: Påhittat exempel på ett avslutat projekt om digital mognad i länets företag.
-  start: "2021-01"
-  end: "2023-06"
-  supportTypes: [digitalisation]
-  area: Kalmar län
-  lead: kalmar-municipality
-  partners: [linnaeus-university]
-  funders: [region-kalmar]
-  related: [dika]
+# --- Kronobergs län ---
+
+- id: almi-kronoberg-loans-advice
+  name: Lån och affärsrådgivning
+  kind: service
+  status: ongoing
+  description: Finansiering och rådgivning för företag i olika skeden.
+  supportTypes: [financing, advisory]
+  area: Kronobergs län
+  lead: almi-kronoberg
+
+- id: foretagsfabriken-incubator
+  name: Inkubatorprogram
+  kind: programme
+  status: ongoing
+  description: Inkubation för kunskapsintensiva företag med potential att växa och nå en internationell marknad.
+  supportTypes: [innovation, advisory]
+  area: Kronobergs län
+  lead: foretagsfabriken
+
+- id: regional-business-grants-kronoberg
+  name: Regionala företagsstöd
+  kind: funding
+  status: ongoing
+  description: Stöd som företag kan söka hos regionen, till exempel för investeringar och utveckling. Villkor och belopp ska kompletteras.
+  supportTypes: [financing, innovation]
+  area: Kronobergs län
+  lead: region-kronoberg
   example: true

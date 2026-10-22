@@ -2,12 +2,14 @@
 # See docs/DATA.md for all fields and allowed values.
 #
 # Actors without `locations` (national agencies, EU funds) are shown in the
-# "Nationellt & EU" column next to the map.
+# "Nationellt & EU" box next to the map. Coordinates are approximate.
+
+# --- Kalmar län ---
 
 - id: region-kalmar
   name: Region Kalmar län
   type: region
-  description: Regionalt utvecklingsansvar i Kalmar län, bland annat för näringsliv, innovation och regionala företagsstöd.
+  description: Regionalt utvecklingsansvar i Kalmar län, bland annat för näringsliv, innovation och regionala företagsstöd. Medfinansierar flera projekt riktade till små och medelstora företag.
   website: https://regionkalmar.se
   locations:
     - { place: Kalmar, lat: 56.6614, lng: 16.3628 }
@@ -15,7 +17,7 @@
 - id: linnaeus-university
   name: Linnéuniversitetet
   type: university
-  description: Universitet i Kalmar och Växjö som driver flera projekt i samverkan med små och medelstora företag.
+  description: Universitet i Kalmar och Växjö som driver flera projekt i samverkan med små och medelstora företag, bland annat inom digitalisering, energi och hållbart byggande.
   website: https://lnu.se
   locations:
     - { place: Kalmar, lat: 56.6655, lng: 16.3655 }
@@ -29,6 +31,14 @@
   locations:
     - { place: Kalmar, lat: 56.6600, lng: 16.3570 }
 
+- id: kalmar-science-park
+  name: Kalmar Science Park
+  type: science-park
+  description: Science park och inkubator på Varvsholmen i Kalmar för idébärare och nystartade företag, i samarbete med näringslivet och Linnéuniversitetet.
+  website: https://kalmarsciencepark.se
+  locations:
+    - { place: Kalmar, lat: 56.6588, lng: 16.3702 }
+
 - id: kalmar-municipality
   name: Kalmar kommun
   type: municipality
@@ -37,27 +47,71 @@
   locations:
     - { place: Kalmar, lat: 56.6634, lng: 16.3567 }
 
-- id: vastervik-municipality
-  name: Västerviks kommun
-  type: municipality
-  website: https://www.vastervik.se
+- id: additive-tech-center
+  name: Additivt Teknikcenter i Hultsfred
+  type: science-park
+  description: Kunskapsnav för additiv tillverkning (3D-printing) i plast och metall. Erbjuder företag tillgång till utrustning, uppdragsutbildning och utvecklingsprojekt.
+  website: https://www.atcab.se
   locations:
-    - { place: Västervik, lat: 57.7577, lng: 16.6370 }
+    - { place: Hultsfred, lat: 57.4855, lng: 15.8330 }
 
-- id: oskarshamn-municipality
-  name: Oskarshamns kommun
+- id: hultsfred-municipality
+  name: Hultsfreds kommun
   type: municipality
-  website: https://www.oskarshamn.se
+  website: https://www.hultsfred.se
   locations:
-    - { place: Oskarshamn, lat: 57.2645, lng: 16.4484 }
+    - { place: Hultsfred, lat: 57.4887, lng: 15.8435 }
 
-- id: energy-agency-southeast
-  name: Energikontor Sydost
-  type: other
-  description: Regionalt energikontor som stöttar bland annat företag i energi- och klimatfrågor.
-  website: https://energikontorsydost.se
+# --- Kronobergs län ---
+
+- id: region-kronoberg
+  name: Region Kronoberg
+  type: region
+  description: Regionalt utvecklingsansvar i Kronobergs län. Medfinansierar flera projekt för länets små och medelstora företag.
+  website: https://www.regionkronoberg.se
   locations:
     - { place: Växjö, lat: 56.8790, lng: 14.8059 }
+
+- id: vaxjo-municipality
+  name: Växjö kommun
+  type: municipality
+  description: Kommunens näringslivsarbete och företagsservice.
+  website: https://vaxjo.se
+  locations:
+    - { place: Växjö, lat: 56.8777, lng: 14.8091 }
+
+- id: almi-kronoberg
+  name: Almi Kronoberg
+  type: business-support
+  description: Erbjuder lån, riskkapital och affärsrådgivning till företag i länet.
+  website: https://www.almi.se/kronoberg/
+  locations:
+    - { place: Växjö, lat: 56.8805, lng: 14.8125 }
+
+- id: videum-science-park
+  name: Videum Science Park
+  type: science-park
+  description: Science park i Växjö med företag, institut och organisationer som hyresgäster.
+  website: https://www.videum.se
+  locations:
+    - { place: Växjö, lat: 56.8538, lng: 14.8248 }
+
+- id: foretagsfabriken
+  name: Företagsfabriken i Kronoberg
+  type: science-park
+  description: Regional inkubator i Kronobergs län för kunskapsintensiva företag med tillväxtpotential.
+  locations:
+    - { place: Växjö, lat: 56.8546, lng: 14.8262 }
+
+- id: godahus
+  name: GodaHus
+  type: network
+  description: Nätverk för hållbart byggande och boende med företag i Småland.
+  website: https://godahus.se
+  locations:
+    - { place: Växjö, lat: 56.8768, lng: 14.8160 }
+
+# --- Nationellt & EU ---
 
 - id: tillvaxtverket
   name: Tillväxtverket
@@ -68,7 +122,7 @@
 - id: vinnova
   name: Vinnova
   type: public-agency
-  description: Sveriges innovationsmyndighet.
+  description: Sveriges innovationsmyndighet. Finansierar bland annat inkubatorer.
   website: https://www.vinnova.se
 
 - id: eu-erdf

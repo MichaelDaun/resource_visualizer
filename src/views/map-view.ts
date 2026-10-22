@@ -1,38 +1,25 @@
 import { select } from "d3-selection";
 import { zoom, zoomIdentity, type ZoomBehavior, type ZoomTransform } from "d3-zoom";
 import "d3-transition";
+import { easeCubicInOut } from "d3-ease";
 import { geoMercator, geoPath, type GeoProjection } from "d3-geo";
 import { forceCollide, forceLink, forceSimulation, forceX, forceY, type SimulationNodeDatum } from "d3-force";
-import { feature, mesh } from "topojson-client";
-import type { GeometryCollection, Topology } from "topojson-specification";
-import type { Feature, FeatureCollection, Geometry } from "geojson";
+import type { Feature, Geometry } from "geojson";
 import type { Graph, GraphEdge, GraphNode } from "../data/graph";
 import type { Location } from "../data/types";
+import { HOME_COUNTIES, isHomeCounty, type GeoIndex, type Place } from "../geo";
 import { t } from "../i18n/sv";
 import { isNodeVisible, type Store } from "../state";
-import { edgeStyles, nodeRadius } from "../theme";
+import { nodeRadius, theme } from "../theme";
 import { curvedPath, drawGlyphs, nodeAriaLabel, positionLabel, wrapLabel } from "./glyphs";
 import { pickLabels, type LabelCandidate, type LabelSide } from "./labels";
 import { applyHighlight, focusSet } from "./highlight";
-import type { View } from "./view";
-
-interface RegionProps {
-  code: string;
-  name: string;
-}
-interface MunicipalityProps extends RegionProps {
-  county: string;
-}
-export type SwedenTopology = Topology<{
-  regions: GeometryCollection<RegionProps>;
-  municipalities: GeometryCollection<MunicipalityProps>;
-}>;
-
-/** County shown in focus when the map opens. */
-const HOME_COUNTY = "08"; // Kalmar län
+import { reducedMotion, type View } from "./view";
 
 const SHELF = { width: 210, margin: 16, rowHeight: 50, header: 44 };
 const NARROW = 720;
+/** Width of the details panel on wide screens, kept clear when zooming to something. */
+const PANEL = 400;
 
 interface LayoutNode extends SimulationNodeDatum {
   id: string;
@@ -48,13 +35,14 @@ interface Point {
   y: number;
 }
 
-export function createMapView(container: HTMLElement, graph: Graph, store: Store, topo: SwedenTopology): View {
-  const regions = feature(topo, topo.objects.regions) as FeatureCollection<Geometry, RegionProps>;
-  const municipalities = feature(topo, topo.objects.municipalities) as FeatureCollection<Geometry, MunicipalityProps>;
-  const home = regions.features.find((f) => f.properties.code === HOME_COUNTY)!;
-  const homeMunicipalities = municipalities.features.filter((f) => f.properties.county === HOME_COUNTY);
-  const municipalityBorders = mesh(topo, topo.objects.municipalities, (a, b) => a !== b);
-  const regionBorders = mesh(topo, topo.objects.regions, (a, b) => a !== b);
+interface MunicipalityFeature extends Feature<Geometry, { code: string; county: string; name: string }> {}
+
+export function createMapView(container: HTMLElement, graph: Graph, store: Store, geo: GeoIndex): View {
+  const homeMunicipalities = geo.municipalities.features.filter((f) => isHomeCounty(f.properties.county));
+  const homeRegions = geo.regions.features.filter((f) => isHomeCounty(f.properties.code));
+  const placeByMunicipality = new Map(
+    geo.places.filter((p) => p.kind === "municipality").map((p) => [p.municipalities[0], p]),
+  );
 
   const svg = select(container)
     .append("svg")
@@ -62,8 +50,20 @@ export function createMapView(container: HTMLElement, graph: Graph, store: Store
     .attr("role", "img")
     .attr("aria-label", t.viewMap);
 
+  const defs = svg.append("defs");
+  const landClip = defs.append("clipPath").attr("id", "land-clip").append("path");
+
   const basemap = svg.append("g").attr("class", "basemap");
-  const landLayer = basemap.append("g");
+  const landLayer = basemap.append("path").attr("class", "land");
+  const homeLayer = basemap.append("g").attr("class", "home").attr("clip-path", "url(#land-clip)");
+  const municipalityLayer = basemap.append("g").attr("class", "municipalities").attr("clip-path", "url(#land-clip)");
+  // The selected place is filled as one merged shape so overlapping simplified borders don't double up.
+  const placeFill = basemap.append("path").attr("class", "place-fill").attr("clip-path", "url(#land-clip)");
+  const lakeLayer = basemap.append("g").attr("class", "lakes");
+  const borderLayer = basemap.append("g").attr("class", "borders").attr("clip-path", "url(#land-clip)");
+  const coastLayer = basemap.append("path").attr("class", "coast");
+  const placeOutline = basemap.append("path").attr("class", "place-outline");
+
   const placeLabels = svg.append("g").attr("class", "place-labels");
   const shelfLayer = svg.append("g").attr("class", "shelf");
   const edgeLayer = svg.append("g").attr("class", "edges");
@@ -79,21 +79,27 @@ export function createMapView(container: HTMLElement, graph: Graph, store: Store
   /** Offsets from each node's anchor, kept between layouts so nodes don't jump around while zooming. */
   const offsets = new Map<string, Point>();
   let visible: GraphNode[] = [];
+  let firstDraw = true;
 
   const zoomBehavior: ZoomBehavior<SVGSVGElement, unknown> = zoom<SVGSVGElement, unknown>()
-    .scaleExtent([0.25, 14])
+    .scaleExtent([0.25, 24])
     .on("zoom", (event) => {
       transform = event.transform;
       basemap.attr("transform", transform.toString());
+      svg.classed("zoomed", transform.k >= 2.2);
       layout(14);
-      draw();
+      draw(false);
     });
   svg.call(zoomBehavior).on("dblclick.zoom", null);
   svg.on("click", (event) => {
-    if (event.target === svg.node() || (event.target as Element).closest(".basemap")) store.update({ selected: null });
+    const target = event.target as Element;
+    if (target === svg.node() || target.classList.contains("land") || target.closest(".lakes")) {
+      store.update({ selected: null, place: null });
+    }
   });
 
   const isNarrow = () => width < NARROW;
+  const duration = (ms: number) => (reducedMotion() ? 0 : ms);
 
   function shelfRect() {
     if (isNarrow()) {
@@ -101,45 +107,82 @@ export function createMapView(container: HTMLElement, graph: Graph, store: Store
       return { x: SHELF.margin, y: height - h - SHELF.margin, w: width - SHELF.margin * 2, h };
     }
     const count = visible.filter((n) => !n.location).length;
-    return {
-      x: SHELF.margin,
-      y: SHELF.margin,
-      w: SHELF.width,
-      h: SHELF.header + Math.max(1, count) * SHELF.rowHeight,
-    };
+    return { x: SHELF.margin, y: SHELF.margin, w: SHELF.width, h: SHELF.header + Math.max(1, count) * SHELF.rowHeight };
+  }
+
+  /** The screen area not covered by the shelf (and the details panel, if open). */
+  function freeArea(panelOpen: boolean): [[number, number], [number, number]] {
+    const pad = 36;
+    if (isNarrow()) {
+      const bottom = panelOpen ? height * 0.45 : height - (100 + SHELF.margin * 2);
+      return [
+        [pad, pad],
+        [width - pad, Math.max(pad + 40, bottom - pad)],
+      ];
+    }
+    const left = SHELF.margin * 2 + SHELF.width + pad;
+    const right = width - pad - (panelOpen ? PANEL : 40);
+    return [
+      [left, pad],
+      [Math.max(left + 60, right), height - pad],
+    ];
   }
 
   function fitProjection() {
-    const points = graph.nodes.flatMap((n) => (n.kind === "actor" ? (n.actor.locations ?? []) : []));
     const focus: Feature = {
       type: "Feature",
       properties: {},
-      geometry: {
-        type: "GeometryCollection",
-        geometries: [home.geometry, { type: "MultiPoint", coordinates: points.map((p) => [p.lng, p.lat]) }],
-      },
+      geometry: { type: "GeometryCollection", geometries: homeRegions.map((f) => f.geometry) },
     };
-    const pad = 40;
-    const left = isNarrow() ? pad : SHELF.margin * 2 + SHELF.width + pad;
-    const bottom = isNarrow() ? 100 + SHELF.margin * 2 + pad : pad;
-    projection = geoMercator().fitExtent(
-      [
-        [left, pad],
-        [Math.max(left + 50, width - pad - 120), Math.max(pad + 50, height - bottom)],
-      ],
-      focus,
-    );
+    projection = geoMercator().fitExtent(freeArea(false), focus);
     const path = geoPath(projection);
-    landLayer.selectAll("*").remove();
-    landLayer
-      .selectAll("path.region")
-      .data(regions.features)
+
+    landClip.attr("d", path(geo.land as never));
+    landLayer.attr("d", path(geo.land as never));
+    coastLayer.attr("d", path(geo.land as never));
+
+    // The county shapes are simplified; a stroke in the fill colour covers the
+    // gap to the more detailed coastline, and the land clip trims the overflow.
+    homeLayer
+      .selectAll("path")
+      .data(homeRegions)
       .join("path")
-      .attr("class", (d) => `region${d.properties.code === HOME_COUNTY ? " region-home" : ""}`)
+      .attr("class", "home-county")
+      .attr("d", path)
+      .attr("stroke-width", projectedKm(3));
+
+    municipalityLayer
+      .selectAll<SVGPathElement, MunicipalityFeature>("path")
+      .data(homeMunicipalities as MunicipalityFeature[], (d) => d.properties.code)
+      .join("path")
+      .attr("class", "municipality")
+      .attr("data-code", (d) => d.properties.code)
+      .attr("d", path)
+      .on("click", (event, d) => {
+        event.stopPropagation();
+        const place = placeByMunicipality.get(d.properties.code);
+        if (place) store.update({ place: place.id, selected: null });
+      });
+
+    lakeLayer
+      .selectAll("path")
+      .data(geo.lakes.features)
+      .join("path")
       .attr("d", path);
-    landLayer.append("path").attr("class", "municipality-border").attr("d", path(municipalityBorders));
-    landLayer.append("path").attr("class", "region-border").attr("d", path(regionBorders));
-    landLayer.append("path").attr("class", "home-outline").attr("d", path(home));
+
+    borderLayer.selectAll("*").remove();
+    borderLayer.append("path").attr("class", "border-municipality").attr("d", path(geo.municipalityBorders));
+    borderLayer.append("path").attr("class", "border-region").attr("d", path(geo.regionBorders));
+    borderLayer.append("path").attr("class", "border-home").attr("d", path(geo.homeBorders));
+
+    drawPlaceOutline();
+  }
+
+  /** Converts kilometres to projected map units at the home counties' latitude. */
+  function projectedKm(km: number): number {
+    const a = projection([15.5, 57])!;
+    const b = projection([15.5, 57 + km / 111])!;
+    return Math.abs(a[1] - b[1]);
   }
 
   function project(loc: Location): Point {
@@ -167,8 +210,7 @@ export function createMapView(container: HTMLElement, graph: Graph, store: Store
    * Initiatives orbit the actor that leads them.
    */
   function layout(ticks: number) {
-    const shelfNodes = visible.filter((n) => !n.location);
-    const shelf = shelfPositions(shelfNodes);
+    const shelf = shelfPositions(visible.filter((n) => !n.location));
     const items: LayoutNode[] = visible.map((node, i) => {
       if (!node.location) {
         const p = shelf.get(node.id)!;
@@ -188,7 +230,10 @@ export function createMapView(container: HTMLElement, graph: Graph, store: Store
       .stop()
       .force("x", forceX<LayoutNode>((d) => d.ax).strength((d) => (d.node.kind === "actor" ? 0.2 : 0.03)))
       .force("y", forceY<LayoutNode>((d) => d.ay).strength((d) => (d.node.kind === "actor" ? 0.2 : 0.03)))
-      .force("collide", forceCollide<LayoutNode>((d) => nodeRadius(d.node) + (d.node.kind === "actor" ? 14 : 7)).iterations(3))
+      .force(
+        "collide",
+        forceCollide<LayoutNode>((d) => nodeRadius(d.node) + (d.node.kind === "actor" ? 14 : 7)).iterations(3),
+      )
       .force(
         "link",
         forceLink<LayoutNode, { source: string; target: string }>(links)
@@ -207,34 +252,100 @@ export function createMapView(container: HTMLElement, graph: Graph, store: Store
     anchors = new Map(items.filter((d) => !d.onShelf).map((d) => [d.id, { x: d.ax, y: d.ay }]));
   }
 
-  function draw() {
+  /** Redraws nodes and edges; `animate` eases them to their new places (used after filtering). */
+  function draw(animate: boolean) {
     drawPlaceLabels();
     drawShelf();
+    const ms = animate ? duration(450) : 0;
 
     const visibleIds = new Set(visible.map((n) => n.id));
     const edges = graph.edges.filter((e) => visibleIds.has(e.source) && visibleIds.has(e.target));
-    edgeLayer
+    const edgePath = (e: GraphEdge) => {
+      const a = positions.get(e.source)!;
+      const b = positions.get(e.target)!;
+      return curvedPath(a.x, a.y, b.x, b.y);
+    };
+    const edgeSel = edgeLayer
       .selectAll<SVGPathElement, GraphEdge>("path")
       .data(edges, (e) => e.id)
-      .join("path")
-      .attr("class", (e) => `edge edge-${e.type}`)
-      .attr("stroke", (e) => edgeStyles[e.type].color)
-      .attr("stroke-width", (e) => edgeStyles[e.type].width)
-      .attr("stroke-dasharray", (e) => edgeStyles[e.type].dash ?? null)
-      .attr("d", (e) => {
-        const a = positions.get(e.source)!;
-        const b = positions.get(e.target)!;
-        return curvedPath(a.x, a.y, b.x, b.y);
-      });
+      .join(
+        (enter) =>
+          enter
+            .append("path")
+            .attr("class", (e) => `edge edge-${e.type}`)
+            .attr("stroke", (e) => theme.edges[e.type].color)
+            .attr("stroke-width", (e) => theme.edges[e.type].width)
+            .attr("stroke-dasharray", (e) => theme.edges[e.type].dash ?? null)
+            .attr("d", edgePath)
+            .style("opacity", 0)
+            .call((s) => s.transition().duration(duration(500)).style("opacity", null)),
+        (update) => update,
+        (exit) => exit.transition().duration(duration(250)).style("opacity", 0).remove(),
+      );
+    if (ms > 0) edgeSel.transition().duration(ms).ease(easeCubicInOut).attr("d", edgePath);
+    else edgeSel.interrupt().attr("d", edgePath);
 
-    // Thin lines from displaced actors back to their true location, and from
-    // actors to their secondary sites.
+    drawLeaders();
+
+    const nodeTransform = (n: GraphNode) => {
+      const p = positions.get(n.id)!;
+      return `translate(${p.x.toFixed(1)},${p.y.toFixed(1)})`;
+    };
+    let entered = 0;
+    const nodes = nodeLayer
+      .selectAll<SVGGElement, GraphNode>("g.node")
+      .data(visible, (n) => n.id)
+      .join(
+        (enter) => {
+          const g = enter
+            .append("g")
+            .attr("class", (n) => `node node-${n.kind} entering`)
+            .attr("tabindex", 0)
+            .attr("role", "button")
+            .attr("aria-label", nodeAriaLabel)
+            .attr("data-id", (n) => n.id)
+            .attr("transform", nodeTransform)
+            // Stagger the first appearance so the map "fills in" instead of popping.
+            .style("--delay", () => `${firstDraw ? entered++ * 35 : 0}ms`);
+          drawGlyphs(g, "right", (n) => n);
+          g.on("click", (event, n) => {
+            event.stopPropagation();
+            store.update({ selected: store.state.selected === n.id ? null : n.id });
+          })
+            .on("keydown", (event: KeyboardEvent, n) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                store.update({ selected: n.id });
+              }
+            })
+            .on("mouseenter", (_, n) => store.update({ hovered: n.id }))
+            .on("mouseleave", () => store.update({ hovered: null }))
+            .on("animationend", function () {
+              this.classList.remove("entering");
+            });
+          return g;
+        },
+        (update) => update,
+        (exit) => exit.classed("leaving", true).transition().duration(duration(250)).style("opacity", 0).remove(),
+      )
+      .classed("on-shelf", (n) => !n.location);
+    if (ms > 0) nodes.transition().duration(ms).ease(easeCubicInOut).attr("transform", nodeTransform);
+    else nodes.interrupt().attr("transform", nodeTransform);
+    firstDraw = false;
+
+    highlight(nodes);
+  }
+
+  /** Thin lines from displaced actors back to their true location, and to their other sites. */
+  function drawLeaders() {
     const leaders: { id: string; owner: string; from: Point; to: Point; secondary: boolean }[] = [];
     for (const n of visible) {
       if (n.kind !== "actor" || !n.location) continue;
       const p = positions.get(n.id)!;
       const a = anchors.get(n.id)!;
-      if (Math.hypot(p.x - a.x, p.y - a.y) > 6) leaders.push({ id: `${n.id}:anchor`, owner: n.id, from: a, to: p, secondary: false });
+      if (Math.hypot(p.x - a.x, p.y - a.y) > 6) {
+        leaders.push({ id: `${n.id}:anchor`, owner: n.id, from: a, to: p, secondary: false });
+      }
       for (const loc of n.actor.locations!.slice(1)) {
         leaders.push({ id: `${n.id}:${loc.place}`, owner: n.id, from: project(loc), to: p, secondary: true });
       }
@@ -264,40 +375,6 @@ export function createMapView(container: HTMLElement, graph: Graph, store: Store
         event.stopPropagation();
         store.update({ selected: d.owner });
       });
-
-    const nodes = nodeLayer
-      .selectAll<SVGGElement, GraphNode>("g.node")
-      .data(visible, (n) => n.id)
-      .join((enter) => {
-        const g = enter
-          .append("g")
-          .attr("class", (n) => `node node-${n.kind}`)
-          .attr("tabindex", 0)
-          .attr("role", "button")
-          .attr("aria-label", nodeAriaLabel)
-          .attr("data-id", (n) => n.id);
-        drawGlyphs(g, "right", (n) => n);
-        g.on("click", (event, n) => {
-          event.stopPropagation();
-          store.update({ selected: store.state.selected === n.id ? null : n.id });
-        })
-          .on("keydown", (event: KeyboardEvent, n) => {
-            if (event.key === "Enter" || event.key === " ") {
-              event.preventDefault();
-              store.update({ selected: n.id });
-            }
-          })
-          .on("mouseenter", (_, n) => store.update({ hovered: n.id }))
-          .on("mouseleave", () => store.update({ hovered: null }));
-        return g;
-      })
-      .attr("transform", (n) => {
-        const p = positions.get(n.id)!;
-        return `translate(${p.x.toFixed(1)},${p.y.toFixed(1)})`;
-      })
-      .classed("on-shelf", (n) => !n.location);
-
-    highlight(nodes);
   }
 
   function drawShelf() {
@@ -310,8 +387,7 @@ export function createMapView(container: HTMLElement, graph: Graph, store: Store
       .attr("x", (r) => r.x)
       .attr("y", (r) => r.y)
       .attr("width", (r) => r.w)
-      .attr("height", (r) => r.h)
-      .attr("rx", 12);
+      .attr("height", (r) => r.h);
     shelfLayer
       .selectAll("text")
       .data(hasShelf ? [rect] : [])
@@ -323,22 +399,40 @@ export function createMapView(container: HTMLElement, graph: Graph, store: Store
 
   function drawPlaceLabels() {
     const path = geoPath(projection);
+    const k = transform.k;
     const labels = [
-      ...homeMunicipalities.map((f) => ({ f, cls: "place-municipality", minK: 0.9 })),
-      ...regions.features
-        .filter((f) => f.properties.code !== HOME_COUNTY)
-        .map((f) => ({ f, cls: "place-region", minK: 0 })),
-    ].filter((d) => transform.k >= d.minK);
+      ...homeMunicipalities.map((f) => ({ key: f.properties.code, f, cls: "place-municipality", text: f.properties.name, minK: 0.9 })),
+      ...geo.regions.features
+        .filter((f) => !isHomeCounty(f.properties.code))
+        .map((f) => ({ key: `r${f.properties.code}`, f, cls: "place-region", text: f.properties.name, minK: 0 })),
+      ...geo.lakes.features
+        .filter((f) => !f.properties.name.startsWith("lake-"))
+        .map((f) => ({ key: `l${f.properties.name}`, f, cls: "place-lake", text: f.properties.name, minK: 1.6 })),
+    ].filter((d) => k >= d.minK);
     placeLabels
       .selectAll<SVGTextElement, (typeof labels)[number]>("text")
-      .data(labels, (d) => d.f.properties.code)
+      .data(labels, (d) => d.key)
       .join("text")
       .attr("class", (d) => d.cls)
       .attr("transform", (d) => {
-        const [x, y] = transform.apply(path.centroid(d.f));
+        const [x, y] = transform.apply(path.centroid(d.f as Feature));
         return `translate(${x.toFixed(1)},${y.toFixed(1)})`;
       })
-      .text((d) => d.f.properties.name);
+      .text((d) => d.text);
+  }
+
+  function currentPlace(): Place | undefined {
+    return store.state.place ? geo.placeById.get(store.state.place) : undefined;
+  }
+
+  function drawPlaceOutline() {
+    const place = currentPlace();
+    const codes = new Set(place?.municipalities ?? []);
+    municipalityLayer.selectAll<SVGPathElement, MunicipalityFeature>("path").classed("active", (d) => codes.has(d.properties.code));
+    const d = place ? geoPath(projection)(place.feature) : null;
+    placeOutline.attr("d", d);
+    placeFill.attr("d", d);
+    svg.classed("has-place", Boolean(place));
   }
 
   function highlight(nodes = nodeLayer.selectAll<SVGGElement, GraphNode>("g.node")) {
@@ -353,6 +447,11 @@ export function createMapView(container: HTMLElement, graph: Graph, store: Store
     leaderLayer
       .selectAll<SVGGElement, { owner: string }>("g")
       .classed("dim", (d) => focus !== null && !focus.nodes.has(d.owner));
+
+    // Inside a selected place, nodes elsewhere step back.
+    const place = currentPlace();
+    const inPlace = (n: GraphNode) => !place || (n.municipality !== undefined && place.municipalities.includes(n.municipality));
+    nodes.classed("outside-place", (n) => !focus && n.location !== undefined && !inPlace(n));
 
     const shown = chooseLabels(focus?.id ?? null, focus?.nodes ?? null);
     nodes.classed("show-label", (n) => shown.has(n.id));
@@ -371,23 +470,48 @@ export function createMapView(container: HTMLElement, graph: Graph, store: Store
       const p = positions.get(n.id)!;
       return { id: n.id, x: p.x, y: p.y, r: nodeRadius(n), lines: wrapLabel(n.name), fontSize: n.kind === "actor" ? 12 : 11 };
     };
-    const onMap = visible.filter((n) => n.location);
+    const onMap = visible.filter((n) => n.location && positions.has(n.id));
     const degree = (n: GraphNode) => graph.incident.get(n.id)?.length ?? 0;
-    const rank = (n: GraphNode) =>
-      (n.id === focusId ? 0 : focusNodes?.has(n.id) ? 1 : 2) * 10 + (n.kind === "actor" ? 0 : 1);
-    const eligible = onMap.filter((n) =>
-      focusNodes ? focusNodes.has(n.id) : n.kind === "actor" || transform.k >= 2.2,
-    );
+    const rank = (n: GraphNode) => (n.id === focusId ? 0 : focusNodes?.has(n.id) ? 1 : 2) * 10 + (n.kind === "actor" ? 0 : 1);
+    const eligible = onMap.filter((n) => (focusNodes ? focusNodes.has(n.id) : n.kind === "actor" || transform.k >= 2.2));
     eligible.sort((a, b) => rank(a) - rank(b) || degree(b) - degree(a));
     // While focusing, dimmed nodes may be covered by labels.
     const obstacles = focusNodes ? onMap.filter((n) => focusNodes.has(n.id)) : onMap;
-    const shown = pickLabels(eligible.map(candidate), obstacles.map(candidate));
+    const shown = pickLabels(eligible.map(candidate), obstacles.map(candidate), { width, height });
     for (const n of visible) if (!n.location) shown.set(n.id, "right");
     return shown;
   }
 
   function refreshVisible() {
     visible = graph.nodes.filter((n) => isNodeVisible(n, store.state.filters));
+  }
+
+  /** Smoothly zooms so that a feature fills the free part of the screen. */
+  function zoomToFeature(f: Feature, maxScale = 16, panelOpen = true) {
+    if (width === 0) return;
+    const [[x0, y0], [x1, y1]] = geoPath(projection).bounds(f);
+    const [[ax, ay], [bx, by]] = freeArea(panelOpen);
+    const k = Math.min(maxScale, 0.9 * Math.min((bx - ax) / (x1 - x0), (by - ay) / (y1 - y0)));
+    const target = zoomIdentity
+      .translate((ax + bx) / 2, (ay + by) / 2)
+      .scale(k)
+      .translate(-(x0 + x1) / 2, -(y0 + y1) / 2);
+    svg.transition().duration(duration(900)).ease(easeCubicInOut).call(zoomBehavior.transform, target);
+  }
+
+  /** Zooms to the counties currently selected in the filter. */
+  function zoomToCounties() {
+    const codes: string[] = [...store.state.filters.counties];
+    if (codes.length === 0 || codes.length === HOME_COUNTIES.length) {
+      svg.transition().duration(duration(800)).ease(easeCubicInOut).call(zoomBehavior.transform, zoomIdentity);
+      return;
+    }
+    const features = geo.regions.features.filter((f) => codes.includes(f.properties.code));
+    zoomToFeature(
+      { type: "Feature", properties: {}, geometry: { type: "GeometryCollection", geometries: features.map((f) => f.geometry) } },
+      16,
+      false,
+    );
   }
 
   function resize() {
@@ -402,7 +526,7 @@ export function createMapView(container: HTMLElement, graph: Graph, store: Store
     fitProjection();
     basemap.attr("transform", transform.toString());
     layout(220);
-    draw();
+    draw(false);
   }
 
   store.subscribe((state, prev) => {
@@ -411,10 +535,15 @@ export function createMapView(container: HTMLElement, graph: Graph, store: Store
     if (width === 0) return;
     if (state.filters !== prev.filters) {
       layout(120);
-      draw();
-    } else if (state.selected !== prev.selected || state.hovered !== prev.hovered) {
-      highlight();
+      draw(true);
+      if (state.filters.counties !== prev.filters.counties) zoomToCounties();
     }
+    if (state.place !== prev.place) {
+      drawPlaceOutline();
+      const place = currentPlace();
+      if (place) zoomToFeature(place.feature);
+    }
+    if (state.selected !== prev.selected || state.hovered !== prev.hovered || state.place !== prev.place) highlight();
   });
 
   refreshVisible();
@@ -426,19 +555,24 @@ export function createMapView(container: HTMLElement, graph: Graph, store: Store
       const node = graph.byId.get(id);
       if (!node?.location || width === 0) return;
       const [x, y] = projection([node.location.lng, node.location.lat])!;
-      const k = Math.max(transform.k, 2.5);
-      // Keep the node clear of the details panel (right side, or bottom sheet on phones).
+      const k = Math.max(transform.k, 3);
+      const [[ax, ay], [bx, by]] = freeArea(true);
       const target = zoomIdentity
-        .translate(isNarrow() ? width / 2 : width / 2 - 160, isNarrow() ? height * 0.22 : height / 2)
+        .translate((ax + bx) / 2, (ay + by) / 2)
         .scale(k)
         .translate(-x, -y);
-      svg.transition().duration(650).call(zoomBehavior.transform, target);
+      svg.transition().duration(duration(800)).ease(easeCubicInOut).call(zoomBehavior.transform, target);
+    },
+    focusPlace(id: string) {
+      const place = geo.placeById.get(id);
+      if (place) zoomToFeature(place.feature);
     },
     zoomBy(factor: number) {
-      svg.transition().duration(250).call(zoomBehavior.scaleBy, factor);
+      svg.transition().duration(duration(300)).call(zoomBehavior.scaleBy, factor);
     },
     reset() {
-      svg.transition().duration(500).call(zoomBehavior.transform, zoomIdentity);
+      store.update({ place: null });
+      svg.transition().duration(duration(800)).ease(easeCubicInOut).call(zoomBehavior.transform, zoomIdentity);
     },
   };
 }

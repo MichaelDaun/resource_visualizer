@@ -45,12 +45,18 @@ const SIDES: LabelSide[] = ["right", "left"];
  * to the left, skipping any that would overlap a label already placed or
  * another node. Returns the side chosen for each label that fits.
  */
-export function pickLabels(candidates: LabelCandidate[], obstacles: LabelCandidate[]): Map<string, LabelSide> {
+export function pickLabels(
+  candidates: LabelCandidate[],
+  obstacles: LabelCandidate[],
+  bounds?: { width: number; height: number },
+): Map<string, LabelSide> {
   const placed: Box[] = [];
   const shown = new Map<string, LabelSide>();
+  const inside = (b: Box) => !bounds || (b.x0 >= 2 && b.y0 >= 2 && b.x1 <= bounds.width - 2 && b.y1 <= bounds.height - 2);
   for (const c of candidates) {
     for (const side of SIDES) {
       const box = labelBox(c, side);
+      if (!inside(box)) continue;
       if (placed.some((p) => overlaps(p, box))) continue;
       if (obstacles.some((o) => o.id !== c.id && hitsCircle(box, o.x, o.y, o.r + 1))) continue;
       placed.push(box);

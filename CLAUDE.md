@@ -16,7 +16,8 @@ Priorities: clear relations, a stylish look, easy data editing for non-developer
 - Everything the user sees: **Swedish**, and only via `src/i18n/sv.ts` – never hard-code UI strings elsewhere.
 - Data ids and YAML field names are English; display values (names, descriptions) Swedish.
 - No UI framework: TypeScript + D3 modules + plain DOM. Keep dependencies few.
-- Colours and line styles live in `src/theme.ts`.
+- Colours, fonts and line styles live in the themes in `src/theme.ts`; CSS uses only the
+  theme's custom properties (`var(--ink)` etc.), never hard-coded colours.
 - New enum values (actor types, support types…) need entries in `src/data/types.ts`,
   `src/i18n/sv.ts`, `src/theme.ts` (if coloured) and `docs/DATA.md`.
 
@@ -41,17 +42,25 @@ phone (412×860) widths, and the map view and the network view.
 
 - `data/*.yaml` → imported via a small YAML plugin in `vite.config.ts` →
   validated by `src/data/validate.ts` → `buildGraph()` in `src/data/graph.ts`.
-- `src/state.ts`: tiny observable store (view, selected, hovered, filters) shared by all parts.
+- `src/geo.ts`: loads the basemap, finds county/municipality for coordinates (with snapping,
+  since borders are simplified) and defines navigable places (counties, municipalities, Öland).
+  `buildGraph(data, geo.locate)` stores counties/municipalities on every node.
+- `src/state.ts`: tiny observable store (view, selected, hovered, place, filters) shared by all parts.
 - `src/views/map-view.ts`: projection + zoomable basemap; nodes are placed in
   *screen space* each zoom, using a short force simulation so nodes at the same
   place spread out (initiatives orbit their lead actor). Label collisions are handled by
   `src/views/labels.ts`. Actors without coordinates go in the "Nationellt & EU" box.
 - `src/views/network-view.ts`: d3-force graph.
-- `src/router.ts`: URL hash `#/karta/<id>` / `#/natverk/<id>`.
+- `src/router.ts`: URL hash `#/karta/<id>`, `#/natverk/<id>`, `#/karta/plats/<place-id>`.
+- Themes: `?tema=fjord|midsommar|natt`; switching reloads the page so every drawn element
+  picks up the new colours.
+- Home counties: Kalmar (08) and Kronoberg (07), see `HOME_COUNTIES` in `src/geo.ts`.
 
 ## Environment notes
 
 - Cloud sessions cannot reach map tile servers, which is one reason the basemap is self-hosted.
-  raw.githubusercontent.com and the npm registry are reachable.
+  raw.githubusercontent.com, media.githubusercontent.com, PyPI and the npm registry are
+  reachable; most other sites (lnu.se, scb.se…) are not unless allowed in the environment's
+  network settings. WebSearch works for research.
 - Deploying to Pages is manual (workflow_dispatch on `main`, or repo variable `DEPLOY_ON_PUSH=true`).
   Work on a feature branch and open a PR into `main`.
