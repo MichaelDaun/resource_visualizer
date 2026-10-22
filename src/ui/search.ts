@@ -96,8 +96,8 @@ export function mountSearch(
             .map((r, i) => {
               const swatch =
                 r.type === "place"
-                  ? `<span class="swatch pin"></span>`
-                  : `<span class="swatch ${r.node.kind === "actor" ? "dot" : "diamond"}" style="--swatch:${nodeColor(r.node)}"></span>`;
+                  ? `<span class="sym pin"></span>`
+                  : `<span class="sym ${r.node.kind === "actor" ? "dot" : "diamond"}" style="--c:${nodeColor(r.node)}"></span>`;
               const meta =
                 r.type === "place"
                   ? t.places.kinds[r.place.kind]

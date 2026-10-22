@@ -1,11 +1,12 @@
 /**
- * Visual themes. Each theme sets CSS custom properties for the page and the
- * colours used when drawing nodes and edges. The active theme is chosen with
- * ?tema=<id> in the URL or the theme menu, and remembered per browser.
+ * Visual themes: Midsommar (light) and Natt (dark), two modes of one design.
+ * Each sets CSS custom properties for the page and the colours used when
+ * drawing nodes and edges. The mode follows the system setting unless the
+ * viewer picks one (remembered per browser, or ?tema=<id> in the URL).
  */
-import "@fontsource-variable/manrope";
 import "@fontsource-variable/bricolage-grotesque";
-import "@fontsource-variable/sora";
+import "@fontsource-variable/atkinson-hyperlegible-next";
+import "@fontsource/instrument-serif/400-italic.css";
 import type { EdgeType, GraphNode } from "./data/graph";
 import type { ActorType, InitiativeKind } from "./data/types";
 
@@ -16,7 +17,7 @@ export interface EdgeStyle {
 }
 
 export interface Theme {
-  id: string;
+  id: "midsommar" | "natt";
   dark: boolean;
   actors: Record<ActorType, string>;
   kinds: Record<InitiativeKind, string>;
@@ -30,70 +31,13 @@ export interface Theme {
 const DASHED = "6 4";
 const DOTTED = "1.5 4";
 
-/** Crisp and cool: white land, clear blue sea, saturated accents. */
-const fjord: Theme = {
-  id: "fjord",
-  dark: false,
-  actors: {
-    region: "#1565ff",
-    municipality: "#2bb3f0",
-    university: "#8b3dff",
-    "business-support": "#ff7a00",
-    "science-park": "#12b76a",
-    "research-institute": "#0d9488",
-    "public-agency": "#5b6b80",
-    "eu-fund": "#003399",
-    network: "#f0386b",
-    other: "#a3825a",
-  },
-  kinds: { project: "#ff2d55", service: "#00b89c", funding: "#ffb000", programme: "#c03cf0" },
-  edges: {
-    lead: { color: "#0c1d2e", width: 1.8 },
-    partner: { color: "#7d8ea3", width: 1.3 },
-    funds: { color: "#f2a100", width: 1.9, dash: DASHED },
-    owns: { color: "#1565ff", width: 1.6 },
-    manages: { color: "#5b6b80", width: 1.4, dash: DASHED },
-    collaborates: { color: "#7d8ea3", width: 1.3, dash: DOTTED },
-  },
-  completed: "#b9c3cf",
-  css: {
-    font: "'Manrope Variable', system-ui, sans-serif",
-    ink: "#0c1d2e",
-    "ink-soft": "#44566b",
-    "ink-faint": "#8394a8",
-    line: "#dde5ee",
-    paper: "#f4f7fa",
-    panel: "#ffffff",
-    "panel-hover": "#f0f5fb",
-    "chip-bg": "#ffffff",
-    "chip-on": "#e4eeff",
-    "chip-on-border": "#a9c5ff",
-    sea: "#d4e7f6",
-    lake: "#cce2f4",
-    land: "#e9eef3",
-    "land-home": "#ffffff",
-    "land-hover": "#eaf3ff",
-    "border-municipality": "#d3dce6",
-    "border-region": "#aebccc",
-    "border-home": "#7f95ad",
-    coast: "#9dbbd6",
-    "label-place": "#7f91a6",
-    "label-region": "#9aaabd",
-    "label-lake": "#6f9cc4",
-    halo: "rgba(255,255,255,0.92)",
-    accent: "#1565ff",
-    "accent-soft": "rgba(21,101,255,0.14)",
-    badge: "#0c1d2e",
-    "badge-ink": "#ffffff",
-    radius: "8px",
-    "radius-small": "6px",
-    shadow: "0 10px 30px rgba(12,29,46,0.12), 0 1px 3px rgba(12,29,46,0.08)",
-    "home-shadow": "drop-shadow(0 6px 14px rgba(40,90,150,0.18))",
-    "node-shadow": "drop-shadow(0 1px 2px rgba(12,29,46,0.35))",
-  },
+const FONTS = {
+  "font-display": "'Bricolage Grotesque Variable', 'Atkinson Hyperlegible Next Variable', sans-serif",
+  "font-text": "'Atkinson Hyperlegible Next Variable', system-ui, sans-serif",
+  "font-water": "'Instrument Serif', Georgia, serif",
 };
 
-/** Warm and playful: meadow land, bright sea, bold primaries. */
+/** Light: meadow land, bright sea, bold primaries. */
 const midsommar: Theme = {
   id: "midsommar",
   dark: false,
@@ -120,39 +64,36 @@ const midsommar: Theme = {
   },
   completed: "#c2c8bb",
   css: {
-    font: "'Bricolage Grotesque Variable', system-ui, sans-serif",
+    ...FONTS,
     ink: "#141414",
     "ink-soft": "#474b43",
-    "ink-faint": "#878c80",
-    line: "#e3e8dc",
-    paper: "#fbfcf8",
+    "ink-faint": "#7d8476",
+    rule: "#141414",
+    line: "#dfe5d6",
+    paper: "#fbfcf7",
     panel: "#ffffff",
-    "panel-hover": "#f3f7ec",
-    "chip-bg": "#ffffff",
-    "chip-on": "#fff1c2",
-    "chip-on-border": "#ffcf4d",
+    "panel-hover": "#f2f6ea",
+    selection: "#fff1b8",
     sea: "#9fd3f7",
     lake: "#93ccf4",
     land: "#e3eed8",
     "land-home": "#f8fcf1",
     "land-hover": "#fff6d4",
-    "border-municipality": "#cbdcb9",
+    town: "#eadfc4",
+    road: "#d8c49b",
+    "road-major": "#e2a23c",
+    "border-municipality": "#c9d9b6",
     "border-region": "#98b67c",
-    "border-home": "#5f8a3f",
-    coast: "#6fb0dc",
-    "label-place": "#6f8a58",
-    "label-region": "#8da878",
-    "label-lake": "#3f8cc4",
-    halo: "rgba(255,255,255,0.94)",
+    "border-home": "#4f7a32",
+    coast: "#5ba6d8",
+    "label-place": "#2f3d26",
+    "label-town": "#3a4a30",
+    "label-region": "#86a070",
+    "label-water": "#1f6fae",
+    halo: "rgba(255,255,255,0.92)",
     accent: "#ff3b1f",
-    "accent-soft": "rgba(255,59,31,0.14)",
-    badge: "#ffcf1f",
-    "badge-ink": "#141414",
-    radius: "16px",
-    "radius-small": "999px",
-    shadow: "0 12px 32px rgba(40,60,20,0.14), 0 2px 4px rgba(40,60,20,0.08)",
-    "home-shadow": "drop-shadow(0 6px 12px rgba(60,100,30,0.2))",
-    "node-shadow": "drop-shadow(0 2px 0 rgba(20,20,20,0.25))",
+    "accent-ink": "#ffffff",
+    focus: "#1e3cff",
   },
 };
 
@@ -183,43 +124,40 @@ const natt: Theme = {
   },
   completed: "#4b5872",
   css: {
-    font: "'Sora Variable', system-ui, sans-serif",
+    ...FONTS,
     ink: "#e8eefc",
     "ink-soft": "#a9b6d0",
-    "ink-faint": "#6d7b98",
+    "ink-faint": "#7381a0",
+    rule: "#e8eefc",
     line: "#222d45",
     paper: "#0a1020",
-    panel: "#111a2e",
-    "panel-hover": "#18233c",
-    "chip-bg": "#111a2e",
-    "chip-on": "#1b2d55",
-    "chip-on-border": "#3d5fa8",
+    panel: "#0d1527",
+    "panel-hover": "#152039",
+    selection: "#1d2d52",
     sea: "#060b17",
-    lake: "#08101f",
+    lake: "#0a1326",
     land: "#111a2c",
-    "land-home": "#18233b",
+    "land-home": "#17223a",
     "land-hover": "#22325a",
-    "border-municipality": "#24314d",
+    town: "#223052",
+    road: "#2d3b5c",
+    "road-major": "#5b6f9e",
+    "border-municipality": "#26334f",
     "border-region": "#33476d",
-    "border-home": "#4d6ea8",
-    coast: "#29436b",
-    "label-place": "#61749a",
+    "border-home": "#5a7fc0",
+    coast: "#2b4a75",
+    "label-place": "#c2cde6",
+    "label-town": "#aebbd8",
     "label-region": "#4f6082",
-    "label-lake": "#3f5f8f",
+    "label-water": "#4f7cc0",
     halo: "rgba(10,16,32,0.88)",
-    accent: "#4d8dff",
-    "accent-soft": "rgba(77,141,255,0.2)",
-    badge: "#ffc93c",
-    "badge-ink": "#0a1020",
-    radius: "10px",
-    "radius-small": "8px",
-    shadow: "0 14px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(120,150,220,0.08)",
-    "home-shadow": "drop-shadow(0 0 18px rgba(77,141,255,0.18))",
-    "node-shadow": "drop-shadow(0 0 4px rgba(140,180,255,0.55))",
+    accent: "#ffc93c",
+    "accent-ink": "#0a1020",
+    focus: "#4d8dff",
   },
 };
 
-export const THEMES: Theme[] = [fjord, midsommar, natt];
+export const THEMES: Theme[] = [midsommar, natt];
 const STORAGE_KEY = "stodkartan-tema";
 
 function chooseTheme(): Theme {
@@ -228,9 +166,14 @@ function chooseTheme(): Theme {
   try {
     stored = localStorage.getItem(STORAGE_KEY);
   } catch {
-    // Storage can be unavailable (private mode); fall back to the default.
+    // Storage can be unavailable (private mode); fall back to the system setting.
   }
-  return THEMES.find((th) => th.id === fromUrl) ?? THEMES.find((th) => th.id === stored) ?? THEMES[0];
+  const prefersDark = window.matchMedia?.("(prefers-color-scheme: dark)").matches;
+  return (
+    THEMES.find((th) => th.id === fromUrl) ??
+    THEMES.find((th) => th.id === stored) ??
+    (prefersDark ? natt : midsommar)
+  );
 }
 
 export const theme: Theme = typeof window === "undefined" ? THEMES[0] : chooseTheme();
@@ -252,6 +195,10 @@ export function switchTheme(id: string) {
   const url = new URL(window.location.href);
   url.searchParams.set("tema", id);
   window.location.href = url.toString();
+}
+
+export function otherTheme(): Theme {
+  return theme.id === "natt" ? midsommar : natt;
 }
 
 export function nodeColor(node: GraphNode): string {

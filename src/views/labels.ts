@@ -8,7 +8,7 @@ export interface LabelCandidate {
   fontSize: number;
 }
 
-interface Box {
+export interface Box {
   x0: number;
   y0: number;
   x1: number;

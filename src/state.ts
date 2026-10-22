@@ -11,7 +11,7 @@ import {
   type SupportType,
 } from "./data/types";
 
-export type View = "map" | "network";
+export type View = "map" | "network" | "finder";
 
 export interface Filters {
   supportTypes: Set<SupportType>;

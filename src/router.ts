@@ -7,7 +7,7 @@ import type { AppState, View } from "./state";
  * `#/karta/dika` opens the map with DIKA selected and `#/karta/plats/oland`
  * opens it zoomed in on Öland.
  */
-const VIEW_SLUGS: Record<View, string> = { map: "karta", network: "natverk" };
+const VIEW_SLUGS: Record<View, string> = { map: "karta", network: "natverk", finder: "hitta" };
 const PLACE_SEGMENT = "plats";
 
 type Route = Pick<AppState, "view" | "selected" | "place">;
