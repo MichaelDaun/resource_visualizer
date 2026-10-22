@@ -1,0 +1,92 @@
+# Projects (time-limited) and services (ongoing offerings) aimed at SMEs.
+# See docs/DATA.md for all fields and allowed values.
+
+- id: dika
+  name: DIKA
+  kind: project
+  status: ongoing
+  description: Projekt vid Linnéuniversitetet riktat till små och medelstora företag. Beskrivning, period och stödtyper är platshållare som ska kompletteras.
+  supportTypes: [digitalisation, skills]
+  area: Kalmar län
+  lead: linnaeus-university
+  funders: [region-kalmar, eu-erdf]
+  example: true
+
+- id: sister-project-a
+  name: Systerprojekt A
+  kind: project
+  status: ongoing
+  description: Påhittat exempel på ett systerprojekt med fokus på hållbar omställning i små företag.
+  start: "2024-03"
+  end: "2027-02"
+  supportTypes: [sustainability, advisory]
+  area: Kalmar län
+  lead: linnaeus-university
+  partners: [almi-kalmar]
+  funders: [eu-erdf, region-kalmar]
+  related: [dika]
+  example: true
+
+- id: sister-project-b
+  name: Systerprojekt B
+  kind: project
+  status: planned
+  description: Påhittat exempel på ett kommande innovationsprojekt tillsammans med kommuner i norra länet.
+  start: "2026-01"
+  end: "2028-12"
+  supportTypes: [innovation, networking]
+  area: Norra Kalmar län
+  lead: linnaeus-university
+  partners: [vastervik-municipality, oskarshamn-municipality]
+  funders: [vinnova]
+  related: [dika, sister-project-a]
+  example: true
+
+- id: almi-loans-advice
+  name: Lån och affärsrådgivning
+  kind: service
+  status: ongoing
+  description: Finansiering och rådgivning för företag i olika skeden.
+  supportTypes: [financing, advisory]
+  area: Kalmar län
+  lead: almi-kalmar
+
+- id: regional-business-grants
+  name: Regionala företagsstöd
+  kind: service
+  status: ongoing
+  description: Exempel på regionala stöd till företag för investeringar och utvecklingsinsatser.
+  supportTypes: [financing, innovation]
+  area: Kalmar län
+  lead: region-kalmar
+  funders: [tillvaxtverket]
+  example: true
+
+- id: energy-efficiency-smes
+  name: Energieffektiva småföretag
+  kind: project
+  status: ongoing
+  description: Påhittat exempel på ett projekt för energikartläggning i små och medelstora företag.
+  start: "2023-09"
+  end: "2026-08"
+  supportTypes: [sustainability, advisory]
+  area: Sydöstra Sverige
+  lead: energy-agency-southeast
+  partners: [region-kalmar, kalmar-municipality]
+  funders: [eu-erdf]
+  example: true
+
+- id: digital-boost
+  name: Digitaliseringslyftet
+  kind: project
+  status: completed
+  description: Påhittat exempel på ett avslutat projekt om digital mognad i länets företag.
+  start: "2021-01"
+  end: "2023-06"
+  supportTypes: [digitalisation]
+  area: Kalmar län
+  lead: kalmar-municipality
+  partners: [linnaeus-university]
+  funders: [region-kalmar]
+  related: [dika]
+  example: true

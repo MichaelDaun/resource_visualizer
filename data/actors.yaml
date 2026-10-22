@@ -1,0 +1,78 @@
+# Organisations that run, fund or take part in support for SMEs.
+# See docs/DATA.md for all fields and allowed values.
+#
+# Actors without `locations` (national agencies, EU funds) are shown in the
+# "Nationellt & EU" column next to the map.
+
+- id: region-kalmar
+  name: Region Kalmar län
+  type: region
+  description: Regionalt utvecklingsansvar i Kalmar län, bland annat för näringsliv, innovation och regionala företagsstöd.
+  website: https://regionkalmar.se
+  locations:
+    - { place: Kalmar, lat: 56.6614, lng: 16.3628 }
+
+- id: linnaeus-university
+  name: Linnéuniversitetet
+  type: university
+  description: Universitet i Kalmar och Växjö som driver flera projekt i samverkan med små och medelstora företag.
+  website: https://lnu.se
+  locations:
+    - { place: Kalmar, lat: 56.6655, lng: 16.3655 }
+    - { place: Växjö, lat: 56.8555, lng: 14.8275 }
+
+- id: almi-kalmar
+  name: Almi Kalmar län
+  type: business-support
+  description: Erbjuder lån, riskkapital och affärsrådgivning till företag i länet.
+  website: https://www.almi.se/kalmar/
+  locations:
+    - { place: Kalmar, lat: 56.6600, lng: 16.3570 }
+
+- id: kalmar-municipality
+  name: Kalmar kommun
+  type: municipality
+  description: Kommunens näringslivsarbete och företagsservice.
+  website: https://kalmar.se
+  locations:
+    - { place: Kalmar, lat: 56.6634, lng: 16.3567 }
+
+- id: vastervik-municipality
+  name: Västerviks kommun
+  type: municipality
+  website: https://www.vastervik.se
+  locations:
+    - { place: Västervik, lat: 57.7577, lng: 16.6370 }
+
+- id: oskarshamn-municipality
+  name: Oskarshamns kommun
+  type: municipality
+  website: https://www.oskarshamn.se
+  locations:
+    - { place: Oskarshamn, lat: 57.2645, lng: 16.4484 }
+
+- id: energy-agency-southeast
+  name: Energikontor Sydost
+  type: other
+  description: Regionalt energikontor som stöttar bland annat företag i energi- och klimatfrågor.
+  website: https://energikontorsydost.se
+  locations:
+    - { place: Växjö, lat: 56.8790, lng: 14.8059 }
+
+- id: tillvaxtverket
+  name: Tillväxtverket
+  type: public-agency
+  description: Statlig myndighet för regional tillväxt och företagande. Förvaltar EU:s regionalfond i Sverige.
+  website: https://tillvaxtverket.se
+
+- id: vinnova
+  name: Vinnova
+  type: public-agency
+  description: Sveriges innovationsmyndighet.
+  website: https://www.vinnova.se
+
+- id: eu-erdf
+  name: Europeiska regionala utvecklingsfonden
+  type: eu-fund
+  description: EU:s regionalfond (ERUF) som bland annat finansierar projekt för konkurrenskraft i små och medelstora företag.
+  website: https://tillvaxtverket.se/eu-program/regionalfonden.html

@@ -1,0 +1,50 @@
+{
+  "name": "resource-visualizer",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Interactive map of support initiatives for small and medium-sized enterprises (SMEs).",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "validate": "vite-node scripts/validate-data.ts",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "geo": "vite-node scripts/build-geo.ts",
+    "check": "npm run typecheck && npm run validate && npm run test"
+  },
+  "dependencies": {
+    "d3-drag": "^3.0.0",
+    "d3-force": "^3.0.0",
+    "d3-geo": "^3.1.1",
+    "d3-selection": "^3.0.0",
+    "d3-transition": "^3.0.1",
+    "d3-zoom": "^3.0.0",
+    "js-yaml": "^5.5.0",
+    "topojson-client": "^3.1.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1",
+    "@types/d3-drag": "^3.0.7",
+    "@types/d3-force": "^3.0.10",
+    "@types/d3-geo": "^3.1.1",
+    "@types/d3-selection": "^3.0.12",
+    "@types/d3-transition": "^3.0.9",
+    "@types/d3-zoom": "^3.0.9",
+    "@types/geojson": "^7946.0.16",
+    "@types/node": "^26.6.5",
+    "@types/topojson-client": "^3.1.5",
+    "@types/topojson-server": "^3.0.4",
+    "@types/topojson-specification": "^1.0.5",
+    "topojson-server": "^3.0.1",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.5",
+    "vite-node": "^6.0.0",
+    "vitest": "^5.0.5"
+  },
+  "engines": {
+    "node": ">=22.12"
+  }
+}

@@ -1,0 +1,16 @@
+# Direct relations between actors that are not tied to a specific initiative.
+# Allowed types: owns, manages, collaborates. See docs/DATA.md.
+
+- from: region-kalmar
+  to: almi-kalmar
+  type: owns
+  note: Delägare tillsammans med Almi Företagspartner AB.
+
+- from: tillvaxtverket
+  to: eu-erdf
+  type: manages
+  note: Förvaltande myndighet för regionalfonden i Sverige.
+
+- from: linnaeus-university
+  to: region-kalmar
+  type: collaborates
