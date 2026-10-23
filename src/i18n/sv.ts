@@ -60,6 +60,7 @@ export const sv = {
   zoomReset: "Visa båda länen",
   toggleFilters: "Urval och teckenförklaring",
   showOnMap: "Visa på kartan",
+  mapUnavailable: "Kartan kunde inte visas i den här webbläsaren (WebGL saknas). Nätverket och Hitta stöd fungerar ändå.",
 
   finder: {
     title: "Hitta stöd för ditt företag",
@@ -116,7 +117,6 @@ export const sv = {
     sameLead: "Mer från samma aktör",
     offersNow: "Erbjuder nu",
     planned: "Planerat",
-    completed: "Avslutat",
     relations: "Relationer",
   },
 
@@ -143,7 +143,6 @@ export const sv = {
   statuses: {
     planned: "Planerat",
     ongoing: "Pågående",
-    completed: "Avslutat",
   } satisfies Record<Status, string>,
 
   supportTypeLabels: {

@@ -50,8 +50,6 @@ export interface Theme {
   actors: Record<ActorType, string>;
   kinds: Record<InitiativeKind, string>;
   edges: Record<EdgeType, EdgeStyle>;
-  /** Fill for completed initiatives. */
-  completed: string;
   map: MapColors;
   /** CSS custom properties, without the leading "--". */
   css: Record<string, string>;
@@ -91,7 +89,6 @@ const midsommar: Theme = {
     manages: { color: "#3d405b", width: 1.5, dash: DASHED },
     collaborates: { color: "#6f7a68", width: 1.4, dash: DOTTED },
   },
-  completed: "#c2c8bb",
   map: {
     land: "#f6faee",
     outside: "#dfe9d3",
@@ -177,7 +174,6 @@ const natt: Theme = {
     manages: { color: "#94a3b8", width: 1.3, dash: DASHED },
     collaborates: { color: "#7383a6", width: 1.2, dash: DOTTED },
   },
-  completed: "#4b5872",
   map: {
     land: "#162139",
     outside: "#0d1527",

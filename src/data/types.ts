@@ -26,7 +26,8 @@ export const INITIATIVE_KINDS = ["project", "service", "funding", "programme"] a
  */
 export type InitiativeKind = (typeof INITIATIVE_KINDS)[number];
 
-export const STATUSES = ["planned", "ongoing", "completed"] as const;
+/** Only current and upcoming offers are listed; remove initiatives once they end. */
+export const STATUSES = ["planned", "ongoing"] as const;
 export type Status = (typeof STATUSES)[number];
 
 export const SUPPORT_TYPES = [

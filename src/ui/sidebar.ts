@@ -121,7 +121,6 @@ export function mountSidebar(panel: HTMLElement, graph: Graph, store: Store, geo
         <li><svg viewBox="-10 -10 20 20"><circle r="6.5" style="fill:var(--ink-soft);stroke:var(--panel)" stroke-width="1.5"/></svg>${esc(t.legendActor)}</li>
         <li>${diamond("ongoing")}${esc(t.legendInitiative)}, ${esc(t.statuses.ongoing.toLowerCase())}</li>
         <li>${diamond("planned")}${esc(t.statuses.planned)}</li>
-        <li>${diamond("completed")}${esc(t.statuses.completed)}</li>
         ${(Object.keys(theme.edges) as EdgeType[])
           .filter((type) => usedEdgeTypes.has(type))
           .map((type) => {
@@ -170,9 +169,9 @@ export function mountSidebar(panel: HTMLElement, graph: Graph, store: Store, geo
   sync();
 }
 
-function diamond(status: "ongoing" | "planned" | "completed"): string {
+function diamond(status: "ongoing" | "planned"): string {
   const color = theme.kinds.project;
-  const fill = status === "planned" ? "var(--panel)" : status === "completed" ? theme.completed : color;
+  const fill = status === "planned" ? "var(--panel)" : color;
   const stroke = status === "ongoing" ? "var(--panel)" : color;
   const dash = status === "planned" ? ` stroke-dasharray="3 2"` : "";
   return `<svg viewBox="-10 -10 20 20"><rect x="-5.5" y="-5.5" width="11" height="11" rx="2" transform="rotate(45)"

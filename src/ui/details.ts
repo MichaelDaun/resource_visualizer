@@ -219,8 +219,7 @@ function actorHtml(graph: Graph, node: ActorNode): string {
     ${section(t.sections.planned, ledWithStatus("planned"))}
     ${section(t.sections.funds, outgoing("funds"))}
     ${section(t.sections.partnerIn, outgoing("partner"))}
-    ${section(t.sections.relations, relationItems)}
-    ${section(t.sections.completed, ledWithStatus("completed"))}`;
+    ${section(t.sections.relations, relationItems)}`;
 }
 
 function period(i: Initiative): string | undefined {
@@ -286,6 +285,5 @@ function placeHtml(graph: Graph, geo: GeoIndex, place: Place, store: Store): str
     ${here.length === 0 ? `<p class="description"><em>${esc(t.places.nothingHere)}</em></p>` : ""}
     ${section(t.sections.offersNow, withStatus("ongoing"))}
     ${section(t.sections.planned, withStatus("planned"))}
-    ${section(t.places.actorsHere, actors.map((n) => nodeLink(graph, n.id)))}
-    ${section(t.sections.completed, withStatus("completed"))}`;
+    ${section(t.places.actorsHere, actors.map((n) => nodeLink(graph, n.id)))}`;
 }
