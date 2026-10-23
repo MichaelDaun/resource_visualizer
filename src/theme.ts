@@ -16,6 +16,34 @@ export interface EdgeStyle {
   dash?: string;
 }
 
+/** Colours for the vector basemap (see views/map-style.ts). */
+export interface MapColors {
+  land: string;
+  /** Land outside the home counties is washed with this colour. */
+  outside: string;
+  water: string;
+  waterLine: string;
+  wood: string;
+  grass: string;
+  farmland: string;
+  residential: string;
+  industrial: string;
+  building: string;
+  buildingLine: string;
+  road: string;
+  roadCasing: string;
+  major: string;
+  majorCasing: string;
+  rail: string;
+  countyBorder: string;
+  municipalityBorder: string;
+  labelCity: string;
+  labelTown: string;
+  labelMinor: string;
+  labelWater: string;
+  halo: string;
+}
+
 export interface Theme {
   id: "midsommar" | "natt";
   dark: boolean;
@@ -24,6 +52,7 @@ export interface Theme {
   edges: Record<EdgeType, EdgeStyle>;
   /** Fill for completed initiatives. */
   completed: string;
+  map: MapColors;
   /** CSS custom properties, without the leading "--". */
   css: Record<string, string>;
 }
@@ -63,6 +92,31 @@ const midsommar: Theme = {
     collaborates: { color: "#6f7a68", width: 1.4, dash: DOTTED },
   },
   completed: "#c2c8bb",
+  map: {
+    land: "#f6faee",
+    outside: "#dfe9d3",
+    water: "#9fd3f7",
+    waterLine: "#78b9e2",
+    wood: "#dcebc8",
+    grass: "#e5f0d6",
+    farmland: "#eef5e2",
+    residential: "#efe9da",
+    industrial: "#ebe4d6",
+    building: "#e0d6c2",
+    buildingLine: "#c9bc9f",
+    road: "#ffffff",
+    roadCasing: "#d9d0b9",
+    major: "#ffd98a",
+    majorCasing: "#e2a23c",
+    rail: "#b5ad98",
+    countyBorder: "#4f7a32",
+    municipalityBorder: "#9bb883",
+    labelCity: "#1d2617",
+    labelTown: "#34432b",
+    labelMinor: "#5e6b55",
+    labelWater: "#1f6fae",
+    halo: "rgba(246,250,238,0.92)",
+  },
   css: {
     ...FONTS,
     ink: "#141414",
@@ -90,7 +144,8 @@ const midsommar: Theme = {
     "label-town": "#3a4a30",
     "label-region": "#86a070",
     "label-water": "#1f6fae",
-    halo: "rgba(255,255,255,0.92)",
+    halo: "rgba(246,250,238,0.9)",
+    outline: "#141414",
     accent: "#ff3b1f",
     "accent-ink": "#ffffff",
     focus: "#1e3cff",
@@ -123,6 +178,31 @@ const natt: Theme = {
     collaborates: { color: "#7383a6", width: 1.2, dash: DOTTED },
   },
   completed: "#4b5872",
+  map: {
+    land: "#162139",
+    outside: "#0d1527",
+    water: "#060b17",
+    waterLine: "#1f3657",
+    wood: "#15253d",
+    grass: "#17243c",
+    farmland: "#162239",
+    residential: "#1c2843",
+    industrial: "#1b2642",
+    building: "#243250",
+    buildingLine: "#33456b",
+    road: "#2b3a58",
+    roadCasing: "#1a2542",
+    major: "#3f5686",
+    majorCasing: "#2a3b61",
+    rail: "#34446a",
+    countyBorder: "#5a7fc0",
+    municipalityBorder: "#324670",
+    labelCity: "#d3dcf0",
+    labelTown: "#aebbd8",
+    labelMinor: "#7a89a8",
+    labelWater: "#4f7cc0",
+    halo: "rgba(14,22,40,0.88)",
+  },
   css: {
     ...FONTS,
     ink: "#e8eefc",
@@ -150,7 +230,8 @@ const natt: Theme = {
     "label-town": "#aebbd8",
     "label-region": "#4f6082",
     "label-water": "#4f7cc0",
-    halo: "rgba(10,16,32,0.88)",
+    halo: "rgba(22,33,57,0.9)",
+    outline: "#050913",
     accent: "#ffc93c",
     "accent-ink": "#0a1020",
     focus: "#4d8dff",

@@ -309,7 +309,7 @@ body[data-view="finder"] .colophon {
 }
 
 .view,
-.view > svg.map-svg,
+.map-canvas,
 .view > svg.network-svg {
   position: absolute;
   inset: 0;
@@ -864,6 +864,96 @@ input:focus-visible + .check {
   text-underline-offset: 3px;
 }
 
+/* Flow diagram: funders → initiative → lead and partners. */
+.flow {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 54px minmax(0, 1fr);
+  grid-template-areas:
+    "head-in . head-out"
+    "in mid out";
+  align-items: center;
+  margin: 12px 0 0;
+}
+
+.flow.no-funders {
+  grid-template-columns: 54px minmax(0, 1fr);
+  grid-template-areas:
+    ". head-out"
+    "mid out";
+}
+
+.flow-head.flow-in {
+  grid-area: head-in;
+}
+
+.flow-head.flow-out {
+  grid-area: head-out;
+}
+
+.flow-col.flow-in {
+  grid-area: in;
+}
+
+.flow-col.flow-out {
+  grid-area: out;
+}
+
+.flow-mid {
+  grid-area: mid;
+}
+
+.flow-lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.flow-lines .edge {
+  opacity: 0.9;
+}
+
+.flow-col {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.flow-head {
+  margin: 0 0 4px;
+  font-size: 12.5px;
+  color: var(--ink-faint);
+}
+
+.flow-head.flow-in {
+  text-align: right;
+}
+
+.flow-mid {
+  display: grid;
+  place-items: center;
+}
+
+.flow-mid .sym {
+  width: 13px;
+  height: 13px;
+}
+
+.flow-link {
+  gap: 8px;
+  padding: 6px 2px;
+  font-size: 14px;
+  line-height: 1.25;
+}
+
+.flow-col.flow-in .flow-link {
+  flex-direction: row-reverse;
+  text-align: right;
+}
+
 /* ---------- Finder ---------- */
 
 .finder {
@@ -1076,187 +1166,38 @@ input:focus-visible + .check {
 
 /* ---------- Map ---------- */
 
+.map-canvas {
+  background: var(--sea);
+}
+
+.maplibregl-map {
+  font: inherit;
+}
+
+/* Nodes and relations are drawn over the map; only the symbols take pointer events. */
 .map-svg {
-  cursor: grab;
-}
-
-.map-svg:active {
-  cursor: grabbing;
-}
-
-.land {
-  fill: var(--land);
-}
-
-.home-county {
-  fill: var(--land-home);
-  stroke: var(--land-home);
-}
-
-.towns path {
-  fill: var(--town);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.4s;
-}
-
-.z-towns .towns path {
-  opacity: 1;
-}
-
-.municipality {
-  fill: transparent;
-  cursor: pointer;
-  transition: fill 0.25s;
-}
-
-.municipality:hover {
-  fill: color-mix(in srgb, var(--land-hover) 75%, transparent);
-}
-
-.place-fill path {
-  fill: var(--accent);
-  opacity: 0.12;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
   pointer-events: none;
 }
 
-[data-theme="natt"] .place-fill path {
-  fill: var(--focus);
-  opacity: 0.16;
+/* Relations fade in with CSS: map movement redraws them every frame. */
+.map-svg .edge {
+  animation: fade-in 0.4s ease backwards;
 }
 
-.lakes path {
-  fill: var(--lake);
-  stroke: var(--coast);
-  stroke-width: 0.5;
-  vector-effect: non-scaling-stroke;
-  pointer-events: none;
+/* Only the selection and its neighbours are named while something is selected. */
+.map-svg .node.dim:not(.on-shelf) .label {
+  visibility: hidden;
 }
 
-.borders path,
-.coast,
-.road,
-.place-outline path {
-  fill: none;
-  vector-effect: non-scaling-stroke;
-  stroke-linejoin: round;
-  stroke-linecap: round;
-  pointer-events: none;
-}
-
-.border-municipality {
-  stroke: var(--border-municipality);
-  stroke-width: 0.9;
-  stroke-dasharray: 3 2;
-}
-
-.has-detail .border-municipality {
-  stroke-dasharray: none;
-}
-
-.border-region,
-.border-national {
-  stroke: var(--border-region);
-  stroke-width: 1.1;
-}
-
-.border-home {
-  stroke: var(--border-home);
-  stroke-width: 1.5;
-}
-
-.coast {
-  stroke: var(--coast);
-  stroke-width: 0.8;
-}
-
-.road {
-  opacity: 0;
-  transition: opacity 0.4s;
-}
-
-.road-motorway,
-.road-trunk {
-  stroke: var(--road-major);
-  stroke-width: 1.5;
-}
-
-.road-trunk {
-  stroke-width: 1.1;
-}
-
-.road-primary {
-  stroke: var(--road);
-  stroke-width: 0.9;
-}
-
-.z-roads .road-motorway,
-.z-roads .road-trunk {
-  opacity: 0.85;
-}
-
-.z-minor-roads .road-primary {
-  opacity: 0.9;
-}
-
-.place-outline path {
-  stroke: var(--accent);
-  stroke-width: 2;
-  stroke-dasharray: 6 4;
-  animation: march 1.4s linear infinite;
-}
-
-@keyframes march {
-  to {
-    stroke-dashoffset: -20;
-  }
-}
-
-.place-labels text {
-  text-anchor: middle;
-  pointer-events: none;
-  paint-order: stroke;
-  stroke: var(--halo);
-  stroke-width: 3px;
-  stroke-linejoin: round;
-}
-
-.place-municipality {
-  font-size: 9.5px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  fill: var(--label-place);
-  opacity: 0.55;
-}
-
-.place-town {
-  font-family: var(--font-display);
-  font-weight: 600;
-  fill: var(--label-town);
-}
-
-.place-region {
-  font-size: 12px;
-  font-style: italic;
-  fill: var(--label-region);
-}
-
-.place-lake,
-.place-sea {
-  font-family: var(--font-water);
-  font-style: italic;
-  fill: var(--label-water);
-  stroke-width: 2.5px !important;
-}
-
-.place-lake {
-  font-size: 13px;
-}
-
-.place-sea {
-  letter-spacing: 0.22em;
-  opacity: 0.85;
+.map-svg .node .glyph,
+.map-svg .node.show-label .label,
+.map-svg .leader circle {
+  pointer-events: auto;
 }
 
 .shelf rect {

@@ -49,6 +49,8 @@ export interface Location {
   place: string;
   lat: number;
   lng: number;
+  /** OpenStreetMap building the actor is in, e.g. "way/617886929"; highlighted on the map. */
+  building?: string;
 }
 
 export interface Actor {
@@ -80,6 +82,8 @@ export interface Initiative {
   lead: string;
   partners?: string[];
   funders?: string[];
+  /** Who to contact, e.g. "Joao Minelmio, strategisk projektledare". */
+  contact?: string;
   /**
    * Municipalities (by name, e.g. "Hultsfred") the initiative is meant for,
    * when that differs from where its lead and partners are.

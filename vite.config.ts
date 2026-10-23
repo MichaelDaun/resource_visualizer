@@ -17,6 +17,8 @@ export default defineConfig({
   // Relative base so the build works both on GitHub Pages (/resource_visualizer/) and locally.
   base: "./",
   plugins: [yamlPlugin()],
+  // MapLibre alone is about 800 kB minified (230 kB gzipped); that is expected.
+  build: { chunkSizeWarningLimit: 1400 },
   test: {
     include: ["tests/unit/**/*.test.ts"],
   },

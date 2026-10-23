@@ -13,16 +13,21 @@ The tool itself is in Swedish; code and documentation are in English.
 
 ![Map view](docs/screenshot-map.png)
 
-| Hultsfreds kommun in the dark mode | Hitta stöd |
+| Additivt Teknikcenter and its building, dark mode | Hitta stöd |
 | --- | --- |
 | ![Place view](docs/screenshot-dark.png) | ![Finder](docs/screenshot-finder.png) |
 
 ## Features
 
-- **Map** of both counties on a detailed basemap: coastline, lakes, borders,
-  towns and major roads. Actors sit at their address and initiatives cluster
-  around the actor that leads them. National actors and EU funds are shown in
-  a box beside the map.
+- **Map** of both counties on OpenStreetMap vector tiles, from the overview
+  down to street level. Actors sit at their address; some are linked to the
+  building they are in, which is highlighted when you zoom in. National actors
+  and EU funds are shown in a box beside the map.
+- **Relations on demand**: select an actor to see the projects, services and
+  programmes it takes part in, hung around the organisation that runs them,
+  with lines to partners and funders. Nothing is drawn while nothing is
+  selected, so the map stays calm. The details panel shows who funds and who
+  runs each initiative as a small diagram.
 - **Places**: click a municipality, or search for one (or for Öland), to zoom
   in and see which actors are there and what they offer now.
 - **Network** view of the same data as a relationship graph.
@@ -77,14 +82,27 @@ tests/e2e/            Playwright browser tests
 
 ### Basemaps
 
-The map is drawn with D3 from basemaps in the repository, so it needs no map
-tile service at runtime. There are two files:
+The map is drawn with [MapLibre GL JS](https://maplibre.org/) on vector tiles
+from [OpenFreeMap](https://openfreemap.org/), a free, open and keyless tile
+service built on OpenStreetMap data. The map style is generated from the
+active theme in `src/views/map-style.ts`, so both modes share one design.
+Nodes and relations are drawn with D3 in an SVG over the map.
+
+Files in the repository add what the tiles don't have:
 
 - `public/geo/sweden.topo.json` (`npm run geo`): simplified borders for all of
-  Sweden and Natural Earth coastlines and lakes. Loaded first.
-- `public/geo/detail.topo.json` (`npm run geo:detail -- <cache-dir>`): detailed
-  coastline, lakes, borders, roads, municipalities and towns for the two
-  counties. Loaded in the background and swapped in.
+  Sweden, used to work out which municipality a coordinate is in, and for the
+  inset map.
+- `public/geo/detail.topo.json` (`npm run geo:detail -- <cache-dir>`): accurate
+  municipality and county shapes for the two counties, for clicking and
+  outlining places.
+- `public/geo/buildings.json` (`npm run buildings`): outlines of the buildings
+  that actors are in.
+
+Open alternatives, if OpenFreeMap ever stops fitting: self-hosting a
+[Protomaps](https://protomaps.com/) PMTiles file of the region on GitHub Pages
+(no tile server needed), or Lantmäteriet's open data. Commercial services such
+as MapTiler or Stadia need an API key.
 
 ## Deployment
 
@@ -99,15 +117,15 @@ One-time setup: in the repository settings, under **Pages**, set **Source** to
 
 ## Data sources and credits
 
-- Coastline, lakes, borders and roads in the detailed basemap: © OpenStreetMap
-  contributors ([ODbL](https://www.openstreetmap.org/copyright)), via
-  [OpenFreeMap](https://openfreemap.org/) vector tiles (OpenMapTiles schema) and
-  [Nominatim](https://nominatim.org/).
-- Urban areas (tätorter 2023): [SCB](https://www.scb.se/) (CC0).
+- Basemap, municipality shapes and buildings: © OpenStreetMap contributors
+  ([ODbL](https://www.openstreetmap.org/copyright)), via
+  [OpenFreeMap](https://openfreemap.org/) vector tiles
+  ([OpenMapTiles](https://openmaptiles.org/) schema), [Nominatim](https://nominatim.org/)
+  and the OpenStreetMap API.
 - Simplified county and municipality borders:
   [okfse/sweden-geojson](https://github.com/okfse/sweden-geojson), based on data
   from Valmyndigheten.
-- Coastlines and lakes outside the two counties:
+- Coastline of Sweden in the inset map:
   [Natural Earth](https://www.naturalearthdata.com/) 1:10m (public domain).
 - Fonts: Bricolage Grotesque, Atkinson Hyperlegible Next and Instrument Serif
   via Fontsource (SIL Open Font License).

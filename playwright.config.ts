@@ -6,6 +6,8 @@ export default defineConfig({
   use: {
     baseURL: "http://localhost:4173",
     trace: "retain-on-failure",
+    // The map is drawn with WebGL; headless Chromium needs the software renderer for it.
+    launchOptions: { args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader"] },
   },
   webServer: {
     command: "npm run build && npx vite preview --port 4173 --strictPort",

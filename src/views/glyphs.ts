@@ -64,8 +64,10 @@ export function drawGlyphs<T>(
     }
     shape.setAttribute("class", "glyph");
     const status = node.kind === "initiative" ? node.initiative.status : "ongoing";
-    shape.style.fill = status === "planned" ? "var(--panel)" : status === "completed" ? theme.completed : color;
-    shape.style.stroke = status === "ongoing" ? "var(--panel)" : color;
+    // A darker shade of the fill outlines the shape, so it holds against any background.
+    shape.style.fill =
+      status === "planned" ? `color-mix(in srgb, ${color} 18%, var(--panel))` : status === "completed" ? theme.completed : color;
+    shape.style.stroke = status === "ongoing" ? `color-mix(in srgb, ${color}, var(--outline) 38%)` : color;
     // Lets theme filters such as glows pick up the node's own colour.
     shape.style.color = color;
     if (status === "planned") shape.setAttribute("stroke-dasharray", "3 2");

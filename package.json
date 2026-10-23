@@ -14,7 +14,8 @@
     "test:e2e": "playwright test",
     "geo": "vite-node scripts/build-geo.ts",
     "check": "npm run typecheck && npm run validate && npm run test",
-    "geo:detail": "vite-node scripts/build-detail.ts"
+    "geo:detail": "vite-node scripts/build-detail.ts",
+    "buildings": "vite-node scripts/build-buildings.ts"
   },
   "dependencies": {
     "@fontsource-variable/atkinson-hyperlegible-next": "^5.3.0",
@@ -28,10 +29,10 @@
     "d3-transition": "^3.0.1",
     "d3-zoom": "^3.0.0",
     "js-yaml": "^5.5.0",
+    "maplibre-gl": "^5.15.0",
     "topojson-client": "^3.1.0"
   },
   "devDependencies": {
-    "@mapbox/vector-tile": "^3.0.0",
     "@playwright/test": "1.56.1",
     "@types/d3-drag": "^3.0.7",
     "@types/d3-ease": "^3.0.2",
@@ -45,7 +46,6 @@
     "@types/topojson-client": "^3.1.5",
     "@types/topojson-server": "^3.0.4",
     "@types/topojson-specification": "^1.0.5",
-    "pbf": "^5.1.2",
     "polygon-clipping": "^0.15.7",
     "simplify-js": "^1.2.4",
     "topojson-server": "^3.0.1",
