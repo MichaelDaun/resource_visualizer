@@ -9,16 +9,28 @@ function collectErrors(page: Page): string[] {
   return errors;
 }
 
-test("map shows the basemap and nodes", async ({ page }) => {
+test("map shows the basemap and actors", async ({ page }) => {
   const errors = collectErrors(page);
   await page.goto("/");
-  await expect(page.locator(".map-svg .home-county")).toHaveCount(2);
-  await expect(page.locator('.map-svg .node[data-id="dika"]')).toHaveCount(1);
+  await expect(page.locator(".map-canvas canvas")).toBeVisible();
+  await expect(page.locator('.map-svg .node[data-id="region-kalmar"]')).toHaveCount(1);
+  // Initiatives have no place of their own; they appear only around a selected actor.
+  await expect(page.locator(".map-svg .node-initiative")).toHaveCount(0);
+  await expect(page.locator(".map-svg .edge")).toHaveCount(0);
   await expect(page.locator(".status-line")).toContainText("67 poster");
-  // The detailed basemap loads after the first render.
+  // The accurate municipality shapes load after the first render.
   await expect(page.locator(".map-svg.has-detail")).toHaveCount(1);
-  await expect(page.locator(".map-svg .roads path").first()).toBeAttached();
   expect(errors).toEqual([]);
+});
+
+test("selecting an actor shows its initiatives and relations", async ({ page }) => {
+  await page.goto("/");
+  await page.locator('.map-svg .node[data-id="additive-tech-center"] .glyph').click();
+  await expect(page.locator("#details h2")).toHaveText("Additivt Teknikcenter i Hultsfred");
+  await expect(page.locator('.map-svg .node[data-id="atc-services"]')).toHaveCount(1);
+  await expect(page.locator(".map-svg .edge").first()).toBeAttached();
+  await page.keyboard.press("Escape");
+  await expect(page.locator(".map-svg .node-initiative")).toHaveCount(0);
 });
 
 test("selecting a node opens details with its relations", async ({ page }) => {
@@ -26,7 +38,8 @@ test("selecting a node opens details with its relations", async ({ page }) => {
   const details = page.locator("#details");
   await expect(details).toBeVisible();
   await expect(details.locator("h2")).toHaveText("DiKa");
-  await details.getByRole("button", { name: /Linnéuniversitetet/ }).click();
+  await expect(details.locator(".flow")).toContainText("Tillväxtverket");
+  await details.getByRole("button", { name: /Linnéuniversitetet/ }).first().click();
   await expect(details.locator("h2")).toHaveText("Linnéuniversitetet");
   await expect(page).toHaveURL(/#\/karta\/linnaeus-university$/);
   await details.getByRole("button", { name: "Stäng" }).click();
@@ -55,7 +68,12 @@ test("network view renders and filters apply", async ({ page, isMobile }) => {
 test("clicking a municipality shows what is offered there", async ({ page, isMobile }) => {
   test.skip(isMobile, "Municipalities are small targets on phones; covered on desktop.");
   await page.goto("/");
-  await page.locator('.municipality[data-code="0860"]').dispatchEvent("click");
+  await expect(page.locator(".map-svg.has-detail")).toHaveCount(1);
+  // Click the map a little south of the actors in Hultsfred.
+  const a = (await page.locator('.map-svg .node[data-id="additive-tech-center"] .glyph').boundingBox())!;
+  const b = (await page.locator('.map-svg .node[data-id="hultsfred-municipality"] .glyph').boundingBox())!;
+  await page.waitForTimeout(500);
+  await page.mouse.click((a.x + b.x) / 2 + a.width / 2, Math.max(a.y, b.y) + 40);
   const details = page.locator("#details");
   await expect(details.locator("h2")).toHaveText("Hultsfreds kommun");
   await expect(details).toContainText("Additivt Teknikcenter i Hultsfred");
@@ -101,8 +119,9 @@ test("'bara' shows a single value", async ({ page, isMobile }) => {
   await row.hover();
   await row.getByRole("button", { name: "bara" }).click();
   await expect(page.locator(".status-line")).toContainText("av 67");
-  await expect(page.locator('.map-svg .node[data-id="kalmar-incubator"]')).toHaveCount(1);
-  await expect(page.locator('.map-svg .node[data-id="dika"]')).toHaveCount(0);
+  // Only actors taking part in a programme stay on the map.
+  await expect(page.locator('.map-svg .node[data-id="kalmar-science-park"]')).toHaveCount(1);
+  await expect(page.locator('.map-svg .node[data-id="almi-kalmar"]')).toHaveCount(0);
   await page.getByRole("button", { name: "Återställ" }).click();
   await expect(page.locator(".status-line")).toContainText("67 poster");
 });

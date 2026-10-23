@@ -89,6 +89,10 @@ export function validateDataset(raw: { actors: unknown; initiatives: unknown; re
           const { lat, lng } = loc;
           if (typeof lat !== "number" || lat < 55 || lat > 70) err(w, `"lat" must be a latitude within Sweden`);
           if (typeof lng !== "number" || lng < 10 || lng > 25) err(w, `"lng" must be a longitude within Sweden`);
+          knownKeys(loc, ["place", "lat", "lng", "building"], w);
+          if (loc.building !== undefined && !(typeof loc.building === "string" && /^way\/\d+$/.test(loc.building))) {
+            err(w, `"building" must be an OpenStreetMap way such as "way/617886929"`);
+          }
         });
       }
     }
@@ -116,6 +120,7 @@ export function validateDataset(raw: { actors: unknown; initiatives: unknown; re
         "partners",
         "funders",
         "serves",
+        "contact",
         "example",
       ],
       where,
@@ -126,6 +131,7 @@ export function validateDataset(raw: { actors: unknown; initiatives: unknown; re
     optionalString(p, "description", where);
     optionalString(p, "website", where);
     optionalString(p, "area", where);
+    optionalString(p, "contact", where);
     for (const key of ["start", "end"]) {
       const v = p[key];
       if (v !== undefined && !(typeof v === "string" && DATE_PATTERN.test(v))) {

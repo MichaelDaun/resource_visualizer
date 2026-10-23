@@ -23,7 +23,7 @@ users are in Swedish.
   description: Kort text om vad aktören gör för SMF.   # optional
   website: https://regionkalmar.se                    # optional
   locations:                   # optional; first entry is the main one
-    - { place: Kalmar, lat: 56.6614, lng: 16.3628 }
+    - { place: Kalmar, lat: 56.6614, lng: 16.3628, building: way/91666351 }   # building is optional
     - { place: Växjö, lat: 56.8555, lng: 14.8275 }    # extra sites are drawn as small rings
   example: true                # optional; marks invented or unverified details
 ```
@@ -33,6 +33,13 @@ national agencies and EU funds. They are shown in the "Nationellt & EU" box.
 
 Coordinates can be copied from a map service: right-click a place in Google Maps
 or OpenStreetMap and copy the latitude and longitude.
+
+`building` links a location to the building it is in on OpenStreetMap. The
+building is tinted in the actor's colour when zoomed in and outlined when the
+actor is selected. To find the id, open
+[openstreetmap.org](https://www.openstreetmap.org), right-click the building,
+choose "Query features" and copy the `way/…` id of the building. Then run
+`npm run buildings` to download its outline into `public/geo/buildings.json`.
 
 | `type`               | Shown as                 |
 | -------------------- | ------------------------ |
@@ -64,11 +71,15 @@ or OpenStreetMap and copy the latitude and longitude.
   partners: [almi-kalmar]      # optional actor ids
   funders: [region-kalmar, eu-erdf]                   # optional actor ids
   serves: [Hultsfred, Vimmerby]                       # optional municipality names, see below
+  contact: Förnamn Efternamn, projektledare           # optional, shown in the details panel
   example: true                # optional
 ```
 
-On the map, an initiative is placed next to the main location of its `lead`. The
-details panel lists other initiatives from the same lead automatically.
+Initiatives have no place of their own. The map shows them only while an actor
+taking part in them (or the initiative itself) is selected, next to the main
+location of their `lead`, with lines to partners and funders. The details panel
+draws who funds and who runs each initiative, and lists other initiatives from
+the same lead automatically.
 
 | `kind`      | Shown as           | Use for                                                   |
 | ----------- | ------------------ | --------------------------------------------------------- |

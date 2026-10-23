@@ -63,16 +63,23 @@ phone (412×860) widths, and the map view and the network view.
   since borders are simplified) and defines navigable places (counties, municipalities, Öland).
   `buildGraph(data, geo.locate)` stores counties/municipalities on every node.
 - `src/state.ts`: tiny observable store (view, selected, hovered, place, filters) shared by all parts.
-- `src/views/map-view.ts`: projection + zoomable basemap; nodes are placed in
-  *screen space* each zoom, using a short force simulation so nodes at the same
-  place spread out (initiatives orbit their lead actor). Label collisions are handled by
-  `src/views/labels.ts`. Actors without coordinates go in the "Nationellt & EU" box.
+- `src/views/map-view.ts`: MapLibre GL map on OpenFreeMap vector tiles, styled from the theme by
+  `src/views/map-style.ts` (colours in `theme.map`). Nodes and relations are an SVG overlay inside
+  the canvas container, placed in *screen space* on every map move with a short force simulation
+  so actors at the same place spread out. Only actors are on the map; initiatives appear around
+  their lead only while the selection involves them, and lines are drawn only for the selection
+  (hovering a node or a sheet row narrows them). Label collisions: `src/views/labels.ts`. Actors
+  without coordinates go in the "Nationellt & EU" box. A location's optional `building`
+  (OSM way) is highlighted from `public/geo/buildings.json`.
 - `src/views/network-view.ts`: d3-force graph.
 - `src/views/finder-view.ts` + `src/finder.ts`: "Hitta stöd" – ranks ongoing/planned initiatives by
   matched needs and reach (in the municipality → in the county → national).
-- Basemaps: `public/geo/sweden.topo.json` (coarse, loaded first) and `public/geo/detail.topo.json`
-  (OSM/OpenFreeMap + Nominatim + SCB, both counties, loaded in the background and swapped in via
-  `mapView.setDetail()`). Rebuild with `npm run geo` and `npm run geo:detail -- <cache-dir>`.
+- Geo files: `public/geo/sweden.topo.json` (coarse borders for lookups and the inset),
+  `public/geo/detail.topo.json` (Nominatim municipality/county shapes for the home counties, loaded
+  in the background and passed to `mapView.setDetail()`) and `public/geo/buildings.json`. Rebuild
+  with `npm run geo`, `npm run geo:detail -- <cache-dir>` and `npm run buildings`.
+- WebGL in headless Chromium needs `--use-angle=swiftshader --enable-unsafe-swiftshader`
+  (set in `playwright.config.ts`; pass them too when taking screenshots).
 - When a place is selected, the map draws only nodes in that place (plus national ones and the
   selection's neighbours) so clusters from nearby towns don't spill over.
 - `src/router.ts`: URL hash `#/karta/<id>`, `#/natverk/<id>`, `#/karta/plats/<place-id>`, `#/hitta`.

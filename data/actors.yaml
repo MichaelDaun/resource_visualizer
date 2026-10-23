@@ -3,7 +3,9 @@
 #
 # Actors without `locations` (national agencies, EU funds) are shown in the
 # "Nationellt och EU" box next to the map. Coordinates come from street
-# addresses where known (geocoded with OpenStreetMap), otherwise the town.
+# addresses where known (geocoded with OpenStreetMap or hitta.se), otherwise
+# the town. `building` links a location to its OpenStreetMap building, which
+# is highlighted on the map; run `npm run buildings` after changing one.
 #
 # Main sources: Region Kalmar län, "Företagsstödjande aktörer i Kalmar län";
 # Region Kronoberg, "Stöd till företagsutveckling"; Växjö kommun,
@@ -42,7 +44,7 @@
   description: Science park på Varvsholmen i Kalmar som driver länets regionala inkubator för nystartade och unga företag.
   website: https://kalmarsciencepark.se
   locations:
-    - { place: Kalmar, lat: 56.6698, lng: 16.3777 }
+    - { place: Kalmar, lat: 56.66983, lng: 16.37770, building: way/91666351 }
 
 - id: iuc-kalmar
   name: IUC Kalmar län
@@ -50,7 +52,7 @@
   description: Industriellt utvecklingscentrum som arbetar för ökad konkurrenskraft och kompetensutveckling hos länets industriföretag, bland annat inom automation, digitalisering, robotisering och nya material.
   website: https://iuc-kalmar.se
   locations:
-    - { place: Kalmar, lat: 56.6702, lng: 16.3785 }
+    - { place: Kalmar, lat: 56.66983, lng: 16.37770, building: way/91666351 }
 
 - id: atrinova
   name: Atrinova affärsutveckling
@@ -98,7 +100,7 @@
   description: Kunskapsnav för additiv tillverkning (3D-printing) i plast och metall. Erbjuder företag tillgång till utrustning, uppdragsutbildning och utvecklingsprojekt.
   website: https://www.atcab.se
   locations:
-    - { place: Hultsfred, lat: 57.4867, lng: 15.8340 }
+    - { place: Hultsfred, lat: 57.48784, lng: 15.83486, building: way/617886929 }
 
 - id: hultsfred-municipality
   name: Hultsfreds kommun

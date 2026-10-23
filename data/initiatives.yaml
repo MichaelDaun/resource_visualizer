@@ -12,17 +12,26 @@
   name: DiKa
   kind: project
   status: ongoing
-  description: Digital kapacitet och datadriven utveckling för små och medelstora företag i Kalmar län. Period och detaljer ska kompletteras.
-  supportTypes: [digitalisation, skills]
+  description: >-
+    Digital kapacitet och datadriven utveckling för små och medelstora företag i Kalmar län.
+    Arbetet utgår från företagets vardag och börjar med dialog och en kartläggning av nuläge,
+    behov och möjligheter – företaget behöver ingen färdig idé. Sedan följer workshops med
+    forskningsingenjörer och forskare, och för vissa företag pilotfall där en idé prövas i liten
+    skala utan stor investering, till exempel med AI, dataanalys eller sensorer (IoT).
+    Målet är att stärka företagens egen förmåga att göra medvetna vägval, inte att leverera färdiga lösningar.
+  start: "2026-09"
+  end: "2029-09"
+  supportTypes: [digitalisation, advisory, skills, innovation]
   area: Kalmar län
   lead: linnaeus-university
-  funders: [region-kalmar, eu-erdf]
-  example: true
+  funders: [region-kalmar, tillvaxtverket]
+  contact: Joao Minelmio, strategisk projektledare
+  serves: [Borgholm, Emmaboda, Hultsfred, Högsby, Kalmar, Mönsterås, Mörbylånga, Nybro, Oskarshamn, Torsås, Vimmerby, Västervik]
 
 - id: iot-lab-sme
   name: IoT-lab för SMF 2.0
   kind: project
-  status: ongoing
+  status: completed
   description: Bygger ett nätverk av företag som drar nytta av varandras kompetens inom sakernas internet (IoT), för att effektivisera verksamheten, minska kostnader och klimatavtryck eller utveckla nya digitala affärsmodeller.
   supportTypes: [digitalisation, innovation, networking]
   area: Kalmar och Kronobergs län
@@ -33,7 +42,7 @@
 - id: hpc-sme
   name: HPC för SMF
   kind: project
-  status: ongoing
+  status: completed
   description: Stöttar små och medelstora företag att utveckla sin datadrivna förmåga med hjälp av AI och högpresterande beräkningar (HPC).
   supportTypes: [digitalisation, innovation]
   area: Kalmar och Kronobergs län
@@ -45,13 +54,20 @@
   name: Smart Dat
   kind: project
   status: ongoing
-  description: Stöttar tillverkande industrier som vill automatisera och digitalisera sin verksamhet.
+  description: >-
+    Insatser inom automatisering och digitalisering för små och medelstora tillverkande företag i
+    Linnéregionen: korta kunskapshöjande aktiviteter och teknikspridning i en befintlig
+    demonstrationsanläggning, för högre innovationsgrad, tillgång till tillämpad forskning och mer
+    hållbar produktion. Genomförs tillsammans med IUC Kalmar, Campus Ljungby och Epic – Innovation &
+    Technology Center, och medfinansieras av Linnéuniversitetet.
   start: "2023-09"
   end: "2026-12"
-  supportTypes: [digitalisation, innovation]
+  supportTypes: [digitalisation, innovation, skills]
   area: Kalmar och Kronobergs län
   lead: linnaeus-university
+  partners: [iuc-kalmar, campus-ljungby]
   funders: [eu-erdf, tillvaxtverket, region-kalmar, region-kronoberg]
+  contact: Hatem Algabroun, projektledare
   website: https://lnu.se/forskning/forskningsprojekt/projekt-smart-dat/
 
 - id: seps

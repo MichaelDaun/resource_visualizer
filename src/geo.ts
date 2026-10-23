@@ -1,7 +1,7 @@
-import { geoCentroid, geoContains, geoDistance } from "d3-geo";
+import { geoContains, geoDistance } from "d3-geo";
 import { feature, merge, mesh } from "topojson-client";
 import type { GeometryCollection, Topology } from "topojson-specification";
-import type { Feature, FeatureCollection, Geometry, MultiLineString, Point } from "geojson";
+import type { Feature, FeatureCollection, Geometry, MultiLineString } from "geojson";
 import { countyName, municipalityName, t } from "./i18n/sv";
 
 interface RegionProps {
@@ -169,64 +169,29 @@ export function createGeoIndex(topo: SwedenTopology): GeoIndex {
   };
 }
 
-// ---------- Detailed basemap (public/geo/detail.topo.json, see scripts/build-detail.ts) ----------
-
-/** Area covered by the detailed basemap; keep in sync with DETAIL_BBOX in scripts/build-detail.ts. */
-export const DETAIL_BBOX = { west: 12.9, south: 55.9, east: 17.4, north: 58.35 };
+// ---------- Accurate shapes (public/geo/detail.topo.json, see scripts/build-detail.ts) ----------
 
 export type DetailTopology = Topology<{
-  land: GeometryCollection;
-  lakes: GeometryCollection;
   municipalities: GeometryCollection<MunicipalityProps>;
   counties: GeometryCollection<{ code: string }>;
   areas: GeometryCollection<{ id: string }>;
-  borders: GeometryCollection<{ level: number }>;
-  roads: GeometryCollection<{ cls: "motorway" | "trunk" | "primary" }>;
-  towns: GeometryCollection<{ name: string; municipality: string; population: number }>;
-  townLabels: GeometryCollection<{ name: string; population: number }>;
-  lakeLabels: GeometryCollection<{ name: string }>;
 }>;
 
 export interface DetailLayers {
-  land: Feature;
-  lakes: Feature;
   municipalities: FeatureCollection<Geometry, MunicipalityProps>;
   counties: FeatureCollection<Geometry, { code: string }>;
-  borders: { national: Feature; county: Feature; municipality: Feature };
-  roads: FeatureCollection<Geometry, { cls: "motorway" | "trunk" | "primary" }>;
-  towns: FeatureCollection<Geometry, { name: string; municipality: string; population: number }>;
-  townLabels: FeatureCollection<Point, { name: string; population: number }>;
-  lakeLabels: FeatureCollection<Point, { name: string }>;
-}
-
-function inDetailArea([lng, lat]: number[]): boolean {
-  return lng > DETAIL_BBOX.west && lng < DETAIL_BBOX.east && lat > DETAIL_BBOX.south && lat < DETAIL_BBOX.north;
-}
-
-/** Natural Earth lakes outside the detailed area, which brings its own lakes. */
-export function lakesOutsideDetail(geo: GeoIndex): Feature[] {
-  return geo.lakes.features.filter((f) => !inDetailArea(geoCentroid(f)));
 }
 
 /**
- * Reads the detailed basemap and points the places at its more accurate
- * shapes, so zooming and outlines follow the real borders.
+ * Reads the accurate municipality and county shapes and points the places at
+ * them, so zooming and outlines follow the real borders.
  */
 export function applyDetail(geo: GeoIndex, topo: DetailTopology): DetailLayers {
   const fc = <K extends keyof DetailTopology["objects"]>(key: K) =>
     feature(topo, topo.objects[key] as never) as unknown as FeatureCollection;
-  const borders = fc("borders").features;
-  const byLevel = (level: number) => borders.find((f) => f.properties?.level === level)!;
   const layers: DetailLayers = {
-    land: fc("land").features[0],
-    lakes: fc("lakes").features[0],
     municipalities: fc("municipalities") as DetailLayers["municipalities"],
     counties: fc("counties") as DetailLayers["counties"],
-    borders: { national: byLevel(2), county: byLevel(4), municipality: byLevel(7) },
-    roads: fc("roads") as DetailLayers["roads"],
-    towns: fc("towns") as DetailLayers["towns"],
-    townLabels: fc("townLabels") as DetailLayers["townLabels"],
-    lakeLabels: fc("lakeLabels") as DetailLayers["lakeLabels"],
   };
   const areas = fc("areas").features;
   for (const place of geo.places) {

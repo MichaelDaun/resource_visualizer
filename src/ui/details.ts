@@ -3,7 +3,7 @@ import type { Initiative, Status } from "../data/types";
 import type { GeoIndex, Place } from "../geo";
 import { t } from "../i18n/sv";
 import { isNodeVisible, type Store } from "../state";
-import { nodeColor } from "../theme";
+import { nodeColor, theme } from "../theme";
 import { esc, safeUrl } from "./dom";
 
 type ActorNode = Extract<GraphNode, { kind: "actor" }>;
@@ -23,6 +23,15 @@ export function mountDetails(panel: HTMLElement, graph: Graph, geo: GeoIndex, st
     if (target.dataset.close !== undefined) close();
     else if (target.dataset.place !== undefined) store.update({ place: target.dataset.place, selected: null });
     else store.update({ selected: target.dataset.select! });
+  });
+  // Hovering a relation narrows the lines drawn on the map to that one.
+  panel.addEventListener("pointerover", (event) => {
+    const row = (event.target as Element).closest<HTMLElement>(".node-link[data-select]");
+    const id = row?.dataset.select ?? null;
+    if (id !== store.state.hovered) store.update({ hovered: id });
+  });
+  panel.addEventListener("pointerleave", () => {
+    if (store.state.hovered) store.update({ hovered: null });
   });
   panel.addEventListener("keydown", (event) => {
     if (event.key === "Escape") close();
@@ -52,6 +61,7 @@ export function mountDetails(panel: HTMLElement, graph: Graph, geo: GeoIndex, st
       : placeHtml(graph, geo, place!, store);
     panel.innerHTML = top + `<div class="sheet-body">${body}</div>`;
     panel.scrollTop = 0;
+    requestAnimationFrame(() => panel.querySelectorAll<HTMLElement>(".flow").forEach(drawFlow));
   };
 
   store.subscribe((state, prev) => {
@@ -65,6 +75,7 @@ export function mountDetails(panel: HTMLElement, graph: Graph, geo: GeoIndex, st
     }
   });
   render();
+  new ResizeObserver(() => panel.querySelectorAll<HTMLElement>(".flow").forEach(drawFlow)).observe(panel);
 }
 
 function overline(text: string, color?: string, shape: "dot" | "diamond" = "dot"): string {
@@ -103,6 +114,63 @@ function nodeLink(graph: Graph, id: string, note?: string): string {
         <span class="chevron" aria-hidden="true">→</span>
       </button>
     </li>`;
+}
+
+/** A compact relation button for the flow diagram. */
+function flowLink(graph: Graph, id: string, type: GraphEdge["type"], note?: string): string {
+  const node = graph.byId.get(id);
+  if (!node) return "";
+  return `
+    <button class="node-link flow-link" data-select="${esc(id)}" data-edge="${type}">
+      <span class="sym dot" style="--c:${nodeColor(node)}" aria-hidden="true"></span>
+      <span class="node-link-text"><span>${esc(node.name)}</span>${note ? `<small>${esc(note)}</small>` : ""}</span>
+    </button>`;
+}
+
+/**
+ * Funders on the left, the initiative in the middle and the organisations
+ * running it on the right. Lines are drawn by drawFlow() once laid out.
+ */
+function flowHtml(graph: Graph, node: InitiativeNode): string {
+  const i = node.initiative;
+  const funders = (i.funders ?? []).map((id) => flowLink(graph, id, "funds"));
+  const runners = [flowLink(graph, i.lead, "lead", t.flow.lead), ...(i.partners ?? []).map((id) => flowLink(graph, id, "partner", t.flow.partner))];
+  if (funders.length === 0 && runners.length < 2) return "";
+  return `
+    <section class="sheet-section">
+      <h3>${esc(t.flow.title)}</h3>
+      <figure class="flow${funders.length ? "" : " no-funders"}">
+        <svg class="flow-lines" aria-hidden="true"></svg>
+        ${funders.length ? `<p class="flow-head flow-in">${esc(t.flow.funds)}</p><div class="flow-col flow-in">${funders.join("")}</div>` : ""}
+        <div class="flow-mid"><span class="sym diamond" style="--c:${nodeColor(node)}" aria-hidden="true"></span></div>
+        <p class="flow-head flow-out">${esc(t.flow.runs)}</p>
+        <div class="flow-col flow-out">${runners.join("")}</div>
+      </figure>
+    </section>`;
+}
+
+/** Draws the lines in a flow diagram from each relation to the initiative in the middle. */
+function drawFlow(figure: HTMLElement) {
+  const svg = figure.querySelector<SVGSVGElement>(".flow-lines");
+  const mid = figure.querySelector<HTMLElement>(".flow-mid .sym");
+  if (!svg || !mid) return;
+  const box = figure.getBoundingClientRect();
+  const m = mid.getBoundingClientRect();
+  const mx = m.left + m.width / 2 - box.left;
+  const my = m.top + m.height / 2 - box.top;
+  svg.setAttribute("viewBox", `0 0 ${box.width} ${box.height}`);
+  const paths = [...figure.querySelectorAll<HTMLElement>(".flow-link")].map((link) => {
+    const r = link.querySelector(".sym")!.getBoundingClientRect();
+    const incoming = link.closest(".flow-col.flow-in") !== null;
+    const style = theme.edges[link.dataset.edge as GraphEdge["type"]];
+    // From each funder's symbol to the diamond, and from the diamond to the symbol of each runner.
+    const x = incoming ? r.right - box.left + 4 : r.left - box.left - 4;
+    const y = r.top + r.height / 2 - box.top;
+    const [x1, y1, x2, y2] = incoming ? [x, y, mx - 9, my] : [mx + 9, my, x, y];
+    const c = (x2 - x1) / 2;
+    return `<path class="edge edge-${link.dataset.edge} hl" d="M${x1},${y1}C${x1 + c},${y1} ${x2 - c},${y2} ${x2},${y2}" stroke="${style.color}" stroke-width="${style.width}"${style.dash ? ` stroke-dasharray="${style.dash}"` : ""}/>`;
+  });
+  svg.innerHTML = paths.join("");
 }
 
 function section(title: string, items: string[]): string {
@@ -176,10 +244,10 @@ function initiativeHtml(graph: Graph, node: InitiativeNode): string {
       [t.supportTypes, i.supportTypes.map((s) => t.supportTypeLabels[s]).join(", ")],
       [t.area, i.area],
       [t.period, period(i)],
+      [t.contact, i.contact],
     ])}
     ${websiteLink(i.website)}
-    ${section(t.sections.funders, (i.funders ?? []).map((id) => nodeLink(graph, id)))}
-    ${section(t.sections.partners, (i.partners ?? []).map((id) => nodeLink(graph, id)))}
+    ${flowHtml(graph, node)}
     ${section(t.sections.sameLead, sameLead)}`;
 }
 
