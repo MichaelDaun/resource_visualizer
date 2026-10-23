@@ -28,28 +28,6 @@
   contact: Joao Minelmio, strategisk projektledare
   serves: [Borgholm, Emmaboda, Hultsfred, Högsby, Kalmar, Mönsterås, Mörbylånga, Nybro, Oskarshamn, Torsås, Vimmerby, Västervik]
 
-- id: iot-lab-sme
-  name: IoT-lab för SMF 2.0
-  kind: project
-  status: completed
-  description: Bygger ett nätverk av företag som drar nytta av varandras kompetens inom sakernas internet (IoT), för att effektivisera verksamheten, minska kostnader och klimatavtryck eller utveckla nya digitala affärsmodeller.
-  supportTypes: [digitalisation, innovation, networking]
-  area: Kalmar och Kronobergs län
-  lead: linnaeus-university
-  funders: [eu-erdf, tillvaxtverket, region-kalmar, region-kronoberg]
-  website: https://lnu.se/forskning/forskningsprojekt/projekt-iot-lab-for-smf-2-.-0/
-
-- id: hpc-sme
-  name: HPC för SMF
-  kind: project
-  status: completed
-  description: Stöttar små och medelstora företag att utveckla sin datadrivna förmåga med hjälp av AI och högpresterande beräkningar (HPC).
-  supportTypes: [digitalisation, innovation]
-  area: Kalmar och Kronobergs län
-  lead: linnaeus-university
-  funders: [eu-erdf, tillvaxtverket, region-kalmar, region-kronoberg]
-  website: https://lnu.se/forskning/forskningsprojekt/projekt-hpc-for-smf/
-
 - id: smart-dat
   name: Smart Dat
   kind: project

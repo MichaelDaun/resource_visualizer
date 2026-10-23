@@ -29,7 +29,7 @@ export function findOffers(graph: Graph, query: FinderQuery): Offer[] {
   if (query.needs.size === 0) return [];
   const offers: Offer[] = [];
   for (const node of graph.nodes) {
-    if (node.kind !== "initiative" || node.initiative.status === "completed") continue;
+    if (node.kind !== "initiative") continue;
     const matches = node.initiative.supportTypes.filter((s) => query.needs.has(s));
     if (matches.length === 0) continue;
     const reach = reachFor(node, query.place);

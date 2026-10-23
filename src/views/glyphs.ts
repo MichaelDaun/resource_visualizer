@@ -1,7 +1,7 @@
 import type { Selection } from "d3-selection";
 import type { GraphNode } from "../data/graph";
 import { t } from "../i18n/sv";
-import { nodeColor, nodeRadius, theme } from "../theme";
+import { nodeColor, nodeRadius } from "../theme";
 
 export type LabelSide = "right" | "left" | "below";
 
@@ -65,8 +65,7 @@ export function drawGlyphs<T>(
     shape.setAttribute("class", "glyph");
     const status = node.kind === "initiative" ? node.initiative.status : "ongoing";
     // A darker shade of the fill outlines the shape, so it holds against any background.
-    shape.style.fill =
-      status === "planned" ? `color-mix(in srgb, ${color} 18%, var(--panel))` : status === "completed" ? theme.completed : color;
+    shape.style.fill = status === "planned" ? `color-mix(in srgb, ${color} 18%, var(--panel))` : color;
     shape.style.stroke = status === "ongoing" ? `color-mix(in srgb, ${color}, var(--outline) 38%)` : color;
     // Lets theme filters such as glows pick up the node's own colour.
     shape.style.color = color;

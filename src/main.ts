@@ -11,7 +11,7 @@ import { $, esc } from "./ui/dom";
 import { mountSearch } from "./ui/search";
 import { mountSidebar } from "./ui/sidebar";
 import { createFinderView } from "./views/finder-view";
-import { createMapView } from "./views/map-view";
+import { createMapView, type MapView } from "./views/map-view";
 import { createNetworkView } from "./views/network-view";
 import type { View } from "./views/view";
 
@@ -73,7 +73,13 @@ async function main() {
   const initial = readHash(graph, geo);
   const store = new Store({ ...initial, hovered: null, filters: defaultFilters() });
 
-  const mapView = createMapView($('.view[data-view="map"]'), graph, store, geo);
+  const mapContainer = $('.view[data-view="map"]');
+  let mapView: MapView;
+  try {
+    mapView = createMapView(mapContainer, graph, store, geo);
+  } catch (err) {
+    mapView = mapFallback(mapContainer, err);
+  }
   const views: Record<ViewName, View> = {
     map: mapView,
     network: createNetworkView($('.view[data-view="network"]'), graph, store),
@@ -157,6 +163,14 @@ async function main() {
     if (initial.selected) current().focus(initial.selected);
     else if (initial.place) current().focusPlace?.(initial.place);
   }, 50);
+}
+
+/** Stands in for the map when WebGL is missing, so the other views still work. */
+function mapFallback(container: HTMLElement, err: unknown): MapView {
+  console.warn("Map unavailable", err);
+  container.innerHTML = `<p class="map-unavailable">${esc(t.mapUnavailable)}</p>`;
+  const noop = () => {};
+  return { resize: noop, focus: noop, focusPlace: noop, zoomBy: noop, reset: noop, setDetail: noop };
 }
 
 main().catch((err) => {

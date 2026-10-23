@@ -17,7 +17,7 @@ test("map shows the basemap and actors", async ({ page }) => {
   // Initiatives have no place of their own; they appear only around a selected actor.
   await expect(page.locator(".map-svg .node-initiative")).toHaveCount(0);
   await expect(page.locator(".map-svg .edge")).toHaveCount(0);
-  await expect(page.locator(".status-line")).toContainText("67 poster");
+  await expect(page.locator(".status-line")).toContainText("65 poster");
   // The accurate municipality shapes load after the first render.
   await expect(page.locator(".map-svg.has-detail")).toHaveCount(1);
   expect(errors).toEqual([]);
@@ -57,11 +57,12 @@ test("network view renders and filters apply", async ({ page, isMobile }) => {
   const errors = collectErrors(page);
   await page.goto("/");
   await page.getByRole("button", { name: "Nätverk", exact: true }).click();
-  await expect(page.locator(".network-svg .node")).toHaveCount(67);
+  // Generous timeout: on CI runners the WebGL map shares a slow software renderer with the layout.
+  await expect(page.locator(".network-svg .node")).toHaveCount(65, { timeout: 15_000 });
   if (isMobile) await page.getByRole("button", { name: "Urval och teckenförklaring" }).click();
   await page.locator('.filter-row label:has(input[data-value="service"])').click();
-  await expect(page.locator(".network-svg .node")).toHaveCount(50);
-  await expect(page.locator(".status-line")).toContainText("50 av 67");
+  await expect(page.locator(".network-svg .node")).toHaveCount(48);
+  await expect(page.locator(".status-line")).toContainText("48 av 65");
   expect(errors).toEqual([]);
 });
 
@@ -69,13 +70,15 @@ test("clicking a municipality shows what is offered there", async ({ page, isMob
   test.skip(isMobile, "Municipalities are small targets on phones; covered on desktop.");
   await page.goto("/");
   await expect(page.locator(".map-svg.has-detail")).toHaveCount(1);
-  // Click the map a little south of the actors in Hultsfred.
-  const a = (await page.locator('.map-svg .node[data-id="additive-tech-center"] .glyph').boundingBox())!;
-  const b = (await page.locator('.map-svg .node[data-id="hultsfred-municipality"] .glyph').boundingBox())!;
-  await page.waitForTimeout(500);
-  await page.mouse.click((a.x + b.x) / 2 + a.width / 2, Math.max(a.y, b.y) + 40);
   const details = page.locator("#details");
-  await expect(details.locator("h2")).toHaveText("Hultsfreds kommun");
+  // Click the map a little south of the actors in Hultsfred. The municipality shapes are
+  // processed off the main thread, so the first click can come too early; retry until it lands.
+  await expect(async () => {
+    const a = (await page.locator('.map-svg .node[data-id="additive-tech-center"] .glyph').boundingBox())!;
+    const b = (await page.locator('.map-svg .node[data-id="hultsfred-municipality"] .glyph').boundingBox())!;
+    await page.mouse.click((a.x + b.x) / 2 + a.width / 2, Math.max(a.y, b.y) + 40);
+    await expect(details.locator("h2")).toHaveText("Hultsfreds kommun", { timeout: 1000 });
+  }).toPass({ timeout: 20_000 });
   await expect(details).toContainText("Additivt Teknikcenter i Hultsfred");
   await expect(page).toHaveURL(/#\/karta\/plats\/hultsfred$/);
   await details.getByRole("button", { name: /Additivt Teknikcenter/ }).click();
@@ -118,12 +121,12 @@ test("'bara' shows a single value", async ({ page, isMobile }) => {
   const row = page.locator('.filter-row:has(input[data-value="programme"])');
   await row.hover();
   await row.getByRole("button", { name: "bara" }).click();
-  await expect(page.locator(".status-line")).toContainText("av 67");
+  await expect(page.locator(".status-line")).toContainText("av 65");
   // Only actors taking part in a programme stay on the map.
   await expect(page.locator('.map-svg .node[data-id="kalmar-science-park"]')).toHaveCount(1);
   await expect(page.locator('.map-svg .node[data-id="almi-kalmar"]')).toHaveCount(0);
   await page.getByRole("button", { name: "Återställ" }).click();
-  await expect(page.locator(".status-line")).toContainText("67 poster");
+  await expect(page.locator(".status-line")).toContainText("65 poster");
 });
 
 test("the finder suggests offers for a company", async ({ page }) => {

@@ -1409,6 +1409,13 @@ input:focus-visible + .check {
   opacity: 1;
 }
 
+.map-unavailable {
+  max-width: 420px;
+  margin: 80px auto;
+  padding: 0 24px;
+  color: var(--ink-soft);
+}
+
 .fatal {
   margin: 40px;
   color: #d0213a;

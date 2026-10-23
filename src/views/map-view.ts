@@ -122,6 +122,8 @@ export function createMapView(container: HTMLElement, graph: Graph, store: Store
     renderWorldCopies: false,
     fadeDuration: 150,
   });
+  // A tile that fails to load (a network hiccup) is not an error in the app; MapLibre retries.
+  map.on("error", (event) => console.warn("Map:", event.error?.message ?? event));
   map.touchZoomRotate.disableRotation();
   map.keyboard.disableRotation();
 

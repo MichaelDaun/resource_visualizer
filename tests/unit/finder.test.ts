@@ -19,7 +19,6 @@ const data: Dataset = {
     { id: "k-both", name: "Kalmar both", kind: "project", status: "ongoing", supportTypes: ["financing", "advisory"], lead: "k" },
     { id: "v-loans", name: "Växjö loans", kind: "service", status: "ongoing", supportTypes: ["financing"], lead: "v" },
     { id: "nat-grant", name: "National grant", kind: "funding", status: "ongoing", supportTypes: ["financing"], lead: "nat" },
-    { id: "old", name: "Old", kind: "project", status: "completed", supportTypes: ["financing"], lead: "k" },
   ],
   relations: [],
 };
@@ -38,7 +37,7 @@ describe("findOffers", () => {
     expect(findOffers(graph, { place: null, needs: new Set() })).toEqual([]);
   });
 
-  it("ranks by matched needs, then closeness, and skips completed and other counties", () => {
+  it("ranks by matched needs, then closeness, and skips other counties", () => {
     const offers = findOffers(graph, { place: kalmarPlace, needs: new Set(["financing", "advisory"]) });
     expect(offers.map((o) => [o.node.id, o.reach])).toEqual([
       ["k-both", "local"],

@@ -60,7 +60,7 @@ choose "Query features" and copy the `way/…` id of the building. Then run
 - id: dika
   name: DIKA
   kind: project                # project, service, funding or programme – see below
-  status: ongoing              # planned, ongoing or completed
+  status: ongoing              # planned or ongoing; remove the entry when it ends
   description: Vad insatsen erbjuder och till vem.   # optional
   website: https://…                                  # optional
   start: "2024-01"             # optional, "YYYY" or "YYYY-MM" in quotes
