@@ -43,3 +43,12 @@ describe("wrapLabel", () => {
     expect(wrapLabel("Europeiska regionala utvecklingsfonden")).toEqual(["Europeiska regionala", "utvecklingsfonden"]);
   });
 });
+
+describe("pickLabels within bounds", () => {
+  it("flips or drops labels that would leave the screen", () => {
+    const nearRight = [at("a", 390, 50, "A fairly long label")];
+    expect(pickLabels(nearRight, [], { width: 400, height: 100 }).get("a")).toBe("left");
+    const tooWide = [at("b", 20, 50, "A label far too long for this space")];
+    expect(pickLabels(tooWide, [], { width: 60, height: 100 }).has("b")).toBe(false);
+  });
+});

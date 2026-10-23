@@ -55,6 +55,12 @@ export function validateDataset(raw: { actors: unknown; initiatives: unknown; re
       err(where, `"${key}" must be one of ${allowed.join(", ")}, got ${JSON.stringify(row[key])}`);
     }
   };
+  /** Catches typos and leftovers such as a misspelt field name. */
+  const knownKeys = (row: Row, allowed: string[], where: string) => {
+    for (const key of Object.keys(row ?? {})) {
+      if (!allowed.includes(key)) err(where, `unknown field "${key}" (allowed: ${allowed.join(", ")})`);
+    }
+  };
   const idList = (row: Row, key: string, where: string): string[] => {
     const value = row[key];
     if (value === undefined) return [];
@@ -68,6 +74,7 @@ export function validateDataset(raw: { actors: unknown; initiatives: unknown; re
   actors.forEach((a, i) => {
     const where = `actors.yaml #${i + 1}${typeof a.id === "string" ? ` (${a.id})` : ""}`;
     registerId(a, where);
+    knownKeys(a, ["id", "name", "type", "description", "website", "locations", "example"], where);
     requireString(a, "name", where);
     oneOf(a, "type", ACTOR_TYPES, where);
     optionalString(a, "description", where);
@@ -88,11 +95,31 @@ export function validateDataset(raw: { actors: unknown; initiatives: unknown; re
   });
 
   const actorIds = new Set(actors.map((a) => a.id as string));
-  const initiativeIds = new Set(initiatives.map((p) => p.id as string));
 
   initiatives.forEach((p, i) => {
     const where = `initiatives.yaml #${i + 1}${typeof p.id === "string" ? ` (${p.id})` : ""}`;
     registerId(p, where);
+    knownKeys(
+      p,
+      [
+        "id",
+        "name",
+        "kind",
+        "status",
+        "description",
+        "website",
+        "start",
+        "end",
+        "supportTypes",
+        "area",
+        "lead",
+        "partners",
+        "funders",
+        "serves",
+        "example",
+      ],
+      where,
+    );
     requireString(p, "name", where);
     oneOf(p, "kind", INITIATIVE_KINDS, where);
     oneOf(p, "status", STATUSES, where);
@@ -116,20 +143,21 @@ export function validateDataset(raw: { actors: unknown; initiatives: unknown; re
       }
     }
     if (!actorIds.has(p.lead as string)) err(where, `"lead" refers to unknown actor ${JSON.stringify(p.lead)}`);
+    const serves = p.serves;
+    if (serves !== undefined && (!Array.isArray(serves) || serves.some((v) => typeof v !== "string"))) {
+      err(where, `"serves" must be a list of municipality names, e.g. [Hultsfred, Vimmerby]`);
+    }
     for (const key of ["partners", "funders"]) {
       for (const id of idList(p, key, where)) {
         if (!actorIds.has(id)) err(where, `"${key}" refers to unknown actor "${id}"`);
         if (id === p.lead && key === "partners") err(where, `lead "${id}" is also listed as partner`);
       }
     }
-    for (const id of idList(p, "related", where)) {
-      if (!initiativeIds.has(id)) err(where, `"related" refers to unknown initiative "${id}"`);
-      if (id === p.id) err(where, `initiative is related to itself`);
-    }
   });
 
   relations.forEach((r, i) => {
     const where = `relations.yaml #${i + 1}`;
+    knownKeys(r, ["from", "to", "type", "note"], where);
     for (const key of ["from", "to"]) {
       if (!actorIds.has(r[key] as string)) err(where, `"${key}" refers to unknown actor ${JSON.stringify(r[key])}`);
     }

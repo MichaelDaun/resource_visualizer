@@ -1,4 +1,5 @@
 import type { Graph, GraphNode } from "../data/graph";
+import type { GeoIndex, Place } from "../geo";
 import { t } from "../i18n/sv";
 import type { Store } from "../state";
 import { nodeColor } from "../theme";
@@ -21,30 +22,60 @@ function searchText(node: GraphNode): string {
   );
 }
 
-/** Ranks name matches above matches in other fields. */
-export function searchNodes(graph: Graph, query: string): GraphNode[] {
+export type SearchResult = { type: "node"; node: GraphNode } | { type: "place"; place: Place };
+
+const resultName = (r: SearchResult) => (r.type === "node" ? r.node.name : r.place.name);
+const resultKey = (r: SearchResult) => (r.type === "node" ? `n:${r.node.id}` : `p:${r.place.id}`);
+
+/** Ranks name matches above matches in other fields; places come first on equal rank. */
+export function search(graph: Graph, geo: GeoIndex | null, query: string): SearchResult[] {
   const q = normalise(query);
   if (!q) return [];
-  return graph.nodes
-    .map((node) => {
-      const name = normalise(node.name);
-      const score = name.startsWith(q) ? 0 : name.includes(q) ? 1 : searchText(node).includes(q) ? 2 : -1;
-      return { node, score };
-    })
+  const score = (name: string, text: string) => {
+    const n = normalise(name);
+    return n.startsWith(q) ? 0 : n.includes(q) ? 1 : text.includes(q) ? 2 : -1;
+  };
+  const results: { result: SearchResult; score: number; order: number }[] = [
+    ...(geo?.places ?? []).map((place) => ({
+      result: { type: "place" as const, place },
+      score: score(place.name, normalise(place.name)),
+      order: 0,
+    })),
+    ...graph.nodes.map((node) => ({
+      result: { type: "node" as const, node },
+      score: score(node.name, searchText(node)),
+      order: 1,
+    })),
+  ];
+  return results
     .filter((r) => r.score >= 0)
-    .sort((a, b) => a.score - b.score || a.node.name.localeCompare(b.node.name, "sv"))
+    .sort(
+      (a, b) =>
+        a.score - b.score || a.order - b.order || resultName(a.result).localeCompare(resultName(b.result), "sv"),
+    )
     .slice(0, MAX_RESULTS)
-    .map((r) => r.node);
+    .map((r) => r.result);
 }
 
-export function mountSearch(root: HTMLElement, graph: Graph, store: Store, onPick: (id: string) => void) {
+/** Node-only search, used by tests and anything without places. */
+export function searchNodes(graph: Graph, query: string): GraphNode[] {
+  return search(graph, null, query).flatMap((r) => (r.type === "node" ? [r.node] : []));
+}
+
+export function mountSearch(
+  root: HTMLElement,
+  graph: Graph,
+  geo: GeoIndex,
+  store: Store,
+  onPick: (result: SearchResult) => void,
+) {
   root.innerHTML = `
     <input type="search" class="search-input" placeholder="${esc(t.searchPlaceholder)}" aria-label="${esc(t.searchPlaceholder)}"
       role="combobox" aria-expanded="false" aria-controls="search-results" autocomplete="off" />
     <ul class="search-results" id="search-results" role="listbox" hidden></ul>`;
   const input = root.querySelector<HTMLInputElement>("input")!;
   const list = root.querySelector<HTMLUListElement>("ul")!;
-  let results: GraphNode[] = [];
+  let results: SearchResult[] = [];
   let active = 0;
 
   const close = () => {
@@ -53,7 +84,7 @@ export function mountSearch(root: HTMLElement, graph: Graph, store: Store, onPic
   };
 
   const render = () => {
-    results = searchNodes(graph, input.value);
+    results = search(graph, geo, input.value);
     active = Math.min(active, Math.max(0, results.length - 1));
     if (!input.value.trim()) return close();
     list.hidden = false;
@@ -62,21 +93,30 @@ export function mountSearch(root: HTMLElement, graph: Graph, store: Store, onPic
       results.length === 0
         ? `<li class="search-empty">${esc(t.searchNoResults)}</li>`
         : results
-            .map((n, i) => {
-              const meta = n.kind === "actor" ? t.actorTypes[n.actor.type] : t.kinds[n.initiative.kind];
-              return `<li role="option" data-id="${esc(n.id)}" aria-selected="${i === active}">
-                <span class="swatch ${n.kind === "actor" ? "dot" : "diamond"}" style="--swatch:${nodeColor(n)}"></span>
-                <span>${esc(n.name)}</span><small>${esc(meta)}</small></li>`;
+            .map((r, i) => {
+              const swatch =
+                r.type === "place"
+                  ? `<span class="sym pin"></span>`
+                  : `<span class="sym ${r.node.kind === "actor" ? "dot" : "diamond"}" style="--c:${nodeColor(r.node)}"></span>`;
+              const meta =
+                r.type === "place"
+                  ? t.places.kinds[r.place.kind]
+                  : r.node.kind === "actor"
+                    ? t.actorTypes[r.node.actor.type]
+                    : t.kinds[r.node.initiative.kind];
+              return `<li role="option" data-key="${esc(resultKey(r))}" aria-selected="${i === active}">
+                ${swatch}<span>${esc(resultName(r))}</span><small>${esc(meta)}</small></li>`;
             })
             .join("");
   };
 
-  const pick = (id: string) => {
+  const pick = (result: SearchResult) => {
     input.value = "";
     close();
     input.blur();
-    store.update({ selected: id });
-    onPick(id);
+    if (result.type === "node") store.update({ selected: result.node.id });
+    else store.update({ place: result.place.id, selected: null });
+    onPick(result);
   };
 
   input.addEventListener("input", () => {
@@ -92,17 +132,18 @@ export function mountSearch(root: HTMLElement, graph: Graph, store: Store, onPic
       render();
     } else if (event.key === "Enter" && results[active]) {
       event.preventDefault();
-      pick(results[active].id);
+      pick(results[active]);
     } else if (event.key === "Escape") {
       input.value = "";
       close();
     }
   });
   list.addEventListener("mousedown", (event) => {
-    const li = (event.target as Element).closest<HTMLElement>("li[data-id]");
-    if (!li) return;
+    const li = (event.target as Element).closest<HTMLElement>("li[data-key]");
+    const result = li && results.find((r) => resultKey(r) === li.dataset.key);
+    if (!result) return;
     event.preventDefault();
-    pick(li.dataset.id!);
+    pick(result);
   });
   input.addEventListener("blur", close);
 }

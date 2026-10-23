@@ -1,7 +1,7 @@
 import type { Selection } from "d3-selection";
 import type { GraphNode } from "../data/graph";
 import { t } from "../i18n/sv";
-import { nodeColor, nodeRadius } from "../theme";
+import { nodeColor, nodeRadius, theme } from "../theme";
 
 export type LabelSide = "right" | "left" | "below";
 
@@ -41,6 +41,13 @@ export function drawGlyphs<T>(
     const color = nodeColor(node);
     const r = nodeRadius(node);
 
+    // Pulsing ring behind the selected node (animated in CSS).
+    const halo = document.createElementNS(ns, "circle");
+    halo.setAttribute("class", "halo");
+    halo.setAttribute("r", String(r + 4));
+    halo.style.stroke = color;
+    g.append(halo);
+
     let shape: SVGElement;
     if (node.kind === "actor") {
       shape = document.createElementNS(ns, "circle");
@@ -57,8 +64,10 @@ export function drawGlyphs<T>(
     }
     shape.setAttribute("class", "glyph");
     const status = node.kind === "initiative" ? node.initiative.status : "ongoing";
-    shape.setAttribute("fill", status === "planned" ? "#fff" : status === "completed" ? "#c3c8cf" : color);
-    shape.setAttribute("stroke", status === "ongoing" ? "#fff" : color);
+    shape.style.fill = status === "planned" ? "var(--panel)" : status === "completed" ? theme.completed : color;
+    shape.style.stroke = status === "ongoing" ? "var(--panel)" : color;
+    // Lets theme filters such as glows pick up the node's own colour.
+    shape.style.color = color;
     if (status === "planned") shape.setAttribute("stroke-dasharray", "3 2");
     g.append(shape);
 

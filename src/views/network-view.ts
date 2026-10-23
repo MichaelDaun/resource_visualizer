@@ -16,8 +16,8 @@ import {
 import type { Graph, GraphEdge, GraphNode } from "../data/graph";
 import { t } from "../i18n/sv";
 import { isNodeVisible, type Store } from "../state";
-import { edgeStyles, nodeRadius } from "../theme";
-import { curvedPath, drawGlyphs, nodeAriaLabel } from "./glyphs";
+import { nodeRadius, theme } from "../theme";
+import { curvedPath, drawGlyphs, nodeAriaLabel, wrapLabel } from "./glyphs";
 import { applyHighlight, focusSet } from "./highlight";
 import type { View } from "./view";
 
@@ -34,7 +34,6 @@ const LINK_DISTANCE: Record<GraphEdge["type"], number> = {
   lead: 70,
   partner: 120,
   funds: 150,
-  related: 110,
   owns: 130,
   manages: 130,
   collaborates: 160,
@@ -102,10 +101,17 @@ export function createNetworkView(container: HTMLElement, graph: Graph, store: S
           .distance((l) => LINK_DISTANCE[l.edge.type])
           .strength(0.6),
       )
-      .force("charge", forceManyBody<SimNode>().strength(-700))
-      .force("collide", forceCollide<SimNode>((d) => nodeRadius(d.node) + 34))
-      .force("x", forceX(0).strength(0.05))
-      .force("y", forceY(0).strength(0.07))
+      .force("charge", forceManyBody<SimNode>().strength(-520).distanceMax(420))
+      // Labels sit below nodes, so give each node room for roughly half its label width.
+      .force(
+        "collide",
+        forceCollide<SimNode>((d) => {
+          const longest = Math.max(...wrapLabel(d.node.name).map((l) => l.length));
+          return Math.max(nodeRadius(d.node) + 30, Math.min(78, longest * 3.6 + 8));
+        }).iterations(2),
+      )
+      .force("x", forceX(0).strength(0.09))
+      .force("y", forceY(0).strength(0.13))
       .on("tick", tick);
     if (!fitted) {
       // Settle the first layout off-screen so the graph doesn't open in a tangle.
@@ -119,9 +125,9 @@ export function createNetworkView(container: HTMLElement, graph: Graph, store: S
       .data(links, (l) => l.edge.id)
       .join("path")
       .attr("class", (l) => `edge edge-${l.edge.type}`)
-      .attr("stroke", (l) => edgeStyles[l.edge.type].color)
-      .attr("stroke-width", (l) => edgeStyles[l.edge.type].width)
-      .attr("stroke-dasharray", (l) => edgeStyles[l.edge.type].dash ?? null);
+      .attr("stroke", (l) => theme.edges[l.edge.type].color)
+      .attr("stroke-width", (l) => theme.edges[l.edge.type].width)
+      .attr("stroke-dasharray", (l) => theme.edges[l.edge.type].dash ?? null);
 
     const dragBehavior = drag<SVGGElement, SimNode>()
       .on("start", (event, d) => {

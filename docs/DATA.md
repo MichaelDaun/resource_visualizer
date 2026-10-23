@@ -1,5 +1,11 @@
 # Data reference
 
+The current entries are collected from public sources, mainly Region Kalmar
+län's list of business support organisations, Region Kronoberg's page on
+support for business development, Växjö kommun's list of business promoters
+and the organisations' own websites. Entries with guessed or unchecked details
+carry `example: true`, which shows a note in the app.
+
 All content lives in three YAML files in [`/data`](../data). They can be edited
 directly on GitHub (open the file, click the pencil icon, commit). Every change
 is checked automatically; if something is wrong, the check on the commit or pull
@@ -34,19 +40,19 @@ or OpenStreetMap and copy the latitude and longitude.
 | `municipality`       | Kommun                   |
 | `university`         | Lärosäte                 |
 | `business-support`   | Företagsfrämjare         |
-| `science-park`       | Science park / inkubator |
+| `science-park`       | Innovationsmiljö (science park, inkubator, teknikcenter) |
 | `research-institute` | Forskningsinstitut       |
 | `public-agency`      | Myndighet                |
 | `eu-fund`            | EU-fond                  |
 | `network`            | Nätverk / förening       |
 | `other`              | Övrig aktör              |
 
-## `initiatives.yaml` – projects and services
+## `initiatives.yaml` – support initiatives
 
 ```yaml
 - id: dika
   name: DIKA
-  kind: project                # project (time-limited) or service (ongoing offering)
+  kind: project                # project, service, funding or programme – see below
   status: ongoing              # planned, ongoing or completed
   description: Vad insatsen erbjuder och till vem.   # optional
   website: https://…                                  # optional
@@ -57,13 +63,33 @@ or OpenStreetMap and copy the latitude and longitude.
   lead: linnaeus-university    # actor id of who runs it (required)
   partners: [almi-kalmar]      # optional actor ids
   funders: [region-kalmar, eu-erdf]                   # optional actor ids
-  related: [sister-project-a]  # optional ids of sister initiatives
+  serves: [Hultsfred, Vimmerby]                       # optional municipality names, see below
   example: true                # optional
 ```
 
-On the map, an initiative is placed next to the main location of its `lead`.
+On the map, an initiative is placed next to the main location of its `lead`. The
+details panel lists other initiatives from the same lead automatically.
 
-A sister relation only needs to be listed on one of the two initiatives.
+| `kind`      | Shown as           | Use for                                                   |
+| ----------- | ------------------ | --------------------------------------------------------- |
+| `project`   | Projekt            | Time-limited efforts, often externally funded             |
+| `service`   | Löpande tjänst     | Ongoing offerings: loans, advice, test beds, equipment    |
+| `funding`   | Bidrag & utlysning | Grants, vouchers and calls that companies apply for       |
+| `programme` | Program            | Structured courses such as incubators and accelerators    |
+
+## Counties and municipalities
+
+You rarely enter a county or municipality: they are worked out from the
+coordinates. An actor belongs to every county it has a location in; an
+initiative belongs to the counties of its lead and partners. This drives the
+"Län" filter, the overview shown when someone clicks a municipality and the
+"Hitta stöd" page. Actors without `locations` are shown whichever county is
+selected, and their initiatives count as available everywhere.
+
+Use `serves` when an offer covers a different area than where its lead sits,
+for example an adviser in Oskarshamn who serves six municipalities. List the
+municipalities by their short name (`Hultsfred`, not `Hultsfreds kommun`).
+The tests check that every name exists.
 
 | `supportTypes`         | Shown as             |
 | ---------------------- | -------------------- |

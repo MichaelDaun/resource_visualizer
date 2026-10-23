@@ -1,4 +1,5 @@
 import type { Graph, GraphNode } from "./data/graph";
+import { HOME_COUNTIES, type CountyCode } from "./geo";
 import {
   ACTOR_TYPES,
   INITIATIVE_KINDS,
@@ -10,19 +11,23 @@ import {
   type SupportType,
 } from "./data/types";
 
-export type View = "map" | "network";
+export type View = "map" | "network" | "finder";
 
 export interface Filters {
   supportTypes: Set<SupportType>;
   statuses: Set<Status>;
   kinds: Set<InitiativeKind>;
   actorTypes: Set<ActorType>;
+  /** Home counties to show. Nodes without a county (national, EU) are always shown. */
+  counties: Set<CountyCode>;
 }
 
 export interface AppState {
   view: View;
   selected: string | null;
   hovered: string | null;
+  /** Id of the place (county, municipality, area) the user navigated to. */
+  place: string | null;
   filters: Filters;
 }
 
@@ -32,6 +37,7 @@ export function defaultFilters(): Filters {
     statuses: new Set(STATUSES),
     kinds: new Set(INITIATIVE_KINDS),
     actorTypes: new Set(ACTOR_TYPES),
+    counties: new Set(HOME_COUNTIES),
   };
 }
 
@@ -58,7 +64,14 @@ export class Store {
   }
 }
 
+function inCounties(node: GraphNode, filters: Filters): boolean {
+  const home = node.counties.filter((c) => (HOME_COUNTIES as readonly string[]).includes(c));
+  // Nodes outside the home counties (or without a place) don't depend on this filter.
+  return home.length === 0 || home.some((c) => filters.counties.has(c as CountyCode));
+}
+
 export function isNodeVisible(node: GraphNode, filters: Filters): boolean {
+  if (!inCounties(node, filters)) return false;
   if (node.kind === "actor") return filters.actorTypes.has(node.actor.type);
   const i = node.initiative;
   return (

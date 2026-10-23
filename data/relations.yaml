@@ -6,11 +6,39 @@
   type: owns
   note: Delägare tillsammans med Almi Företagspartner AB.
 
+- from: region-kronoberg
+  to: almi-kronoberg
+  type: owns
+  note: Delägare tillsammans med Almi Företagspartner AB.
+
+- from: kalmar-municipality
+  to: kalmar-science-park
+  type: owns
+  note: Majoritetsägare via Kalmar kommunföretag AB.
+
+- from: hultsfred-municipality
+  to: additive-tech-center
+  type: owns
+  note: Majoritetsägare; regionala företag äger resten.
+
+- from: vaxjo-municipality
+  to: vaxjo-linnaeus-science-park
+  type: owns
+
+- from: region-kronoberg
+  to: foretagsfabriken
+  type: owns
+  note: Ägs till lika delar av Region Kronoberg, Videum Science Park (Växjö kommun) och Linnéuniversitetet.
+
+- from: vaxjo-linnaeus-science-park
+  to: foretagsfabriken
+  type: owns
+
+- from: linnaeus-university
+  to: foretagsfabriken
+  type: owns
+
 - from: tillvaxtverket
   to: eu-erdf
   type: manages
   note: Förvaltande myndighet för regionalfonden i Sverige.
-
-- from: linnaeus-university
-  to: region-kalmar
-  type: collaborates

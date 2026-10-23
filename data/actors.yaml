@@ -2,32 +2,87 @@
 # See docs/DATA.md for all fields and allowed values.
 #
 # Actors without `locations` (national agencies, EU funds) are shown in the
-# "Nationellt & EU" column next to the map.
+# "Nationellt och EU" box next to the map. Coordinates come from street
+# addresses where known (geocoded with OpenStreetMap), otherwise the town.
+#
+# Main sources: Region Kalmar län, "Företagsstödjande aktörer i Kalmar län";
+# Region Kronoberg, "Stöd till företagsutveckling"; Växjö kommun,
+# "Företagsfrämjare"; the actors' own websites.
+
+# --- Kalmar län ---
 
 - id: region-kalmar
   name: Region Kalmar län
   type: region
-  description: Regionalt utvecklingsansvar i Kalmar län, bland annat för näringsliv, innovation och regionala företagsstöd.
-  website: https://regionkalmar.se
+  description: Regionalt utvecklingsansvar i Kalmar län. Små och medelstora företag kan söka bidrag för att utveckla företaget, och regionen medfinansierar flera projekt för länets företag.
+  website: https://utveckling.regionkalmar.se/utvecklingsomraden/naringsliv-och-innovation/foretagsstodjande-aktorer-i-kalmar-lan/
   locations:
     - { place: Kalmar, lat: 56.6614, lng: 16.3628 }
 
 - id: linnaeus-university
   name: Linnéuniversitetet
   type: university
-  description: Universitet i Kalmar och Växjö som driver flera projekt i samverkan med små och medelstora företag.
-  website: https://lnu.se
+  description: Universitet i Kalmar och Växjö som driver flera projekt för kompetensuppbyggnad i små och medelstora företag, bland annat inom IoT, AI, automation, energi och hållbart byggande.
+  website: https://lnu.se/mot-linneuniversitetet/Organisation/fakulteten-for-teknik/stod-for-sma-och-medelstora-foretag-i-linneregionen-for-att-starka-teknisk-kompetens-och-konkurrenskraft/
   locations:
-    - { place: Kalmar, lat: 56.6655, lng: 16.3655 }
-    - { place: Växjö, lat: 56.8555, lng: 14.8275 }
+    - { place: Kalmar, lat: 56.6606, lng: 16.3622 }
+    - { place: Växjö, lat: 56.8547, lng: 14.8311 }
 
 - id: almi-kalmar
   name: Almi Kalmar län
   type: business-support
-  description: Erbjuder lån, riskkapital och affärsrådgivning till företag i länet.
+  description: Hjälper små och medelstora företag att utvecklas genom finansiering, riskkapital och affärsutveckling.
   website: https://www.almi.se/kalmar/
   locations:
     - { place: Kalmar, lat: 56.6600, lng: 16.3570 }
+
+- id: kalmar-science-park
+  name: Kalmar Science Park
+  type: science-park
+  description: Science park på Varvsholmen i Kalmar som driver länets regionala inkubator för nystartade och unga företag.
+  website: https://kalmarsciencepark.se
+  locations:
+    - { place: Kalmar, lat: 56.6698, lng: 16.3777 }
+
+- id: iuc-kalmar
+  name: IUC Kalmar län
+  type: business-support
+  description: Industriellt utvecklingscentrum som arbetar för ökad konkurrenskraft och kompetensutveckling hos länets industriföretag, bland annat inom automation, digitalisering, robotisering och nya material.
+  website: https://iuc-kalmar.se
+  locations:
+    - { place: Kalmar, lat: 56.6702, lng: 16.3785 }
+
+- id: atrinova
+  name: Atrinova affärsutveckling
+  type: business-support
+  description: Stöttar idérika personer som vill starta, etablera och utveckla företag eller innovationer i norra Kalmar län. Rådgivningen är kostnadsfri och sker under sekretess.
+  website: https://www.atrinova.se
+  locations:
+    - { place: Oskarshamn, lat: 57.2634, lng: 16.4554 }
+
+- id: nfc-kalmarsund
+  name: Nyföretagarcentrum Kalmarsund
+  type: business-support
+  description: Kostnadsfri och konfidentiell rådgivning till nyföretagare i södra Kalmar län.
+  website: https://nyforetagarcentrum.se/kalmarsund/
+  locations:
+    - { place: Kalmar, lat: 56.6622, lng: 16.3598 }
+
+- id: coompanion-kalmar
+  name: Coompanion Kalmar län
+  type: business-support
+  description: Kostnadsfri rådgivning för den som vill utveckla en idé eller ett företag tillsammans med andra, till exempel som kooperativ eller inom den sociala ekonomin.
+  website: https://coompanion.se/kalmar-lan/
+  locations:
+    - { place: Kalmar, lat: 56.6640, lng: 16.3590 }
+
+- id: ehealth-arena
+  name: eHealth Arena
+  type: science-park
+  description: Arbetar för ökat användande av e-hälsotjänster och för näringslivstillväxt inom e-hälsa i Kalmar län.
+  website: https://www.ehealtharena.se/malgrupper/naringsliv/
+  locations:
+    - { place: Kalmar, lat: 56.6680, lng: 16.3640 }
 
 - id: kalmar-municipality
   name: Kalmar kommun
@@ -37,39 +92,166 @@
   locations:
     - { place: Kalmar, lat: 56.6634, lng: 16.3567 }
 
-- id: vastervik-municipality
-  name: Västerviks kommun
-  type: municipality
-  website: https://www.vastervik.se
+- id: additive-tech-center
+  name: Additivt Teknikcenter i Hultsfred
+  type: science-park
+  description: Kunskapsnav för additiv tillverkning (3D-printing) i plast och metall. Erbjuder företag tillgång till utrustning, uppdragsutbildning och utvecklingsprojekt.
+  website: https://www.atcab.se
   locations:
-    - { place: Västervik, lat: 57.7577, lng: 16.6370 }
+    - { place: Hultsfred, lat: 57.4867, lng: 15.8340 }
 
-- id: oskarshamn-municipality
-  name: Oskarshamns kommun
+- id: hultsfred-municipality
+  name: Hultsfreds kommun
   type: municipality
-  website: https://www.oskarshamn.se
+  website: https://www.hultsfred.se
   locations:
-    - { place: Oskarshamn, lat: 57.2645, lng: 16.4484 }
+    - { place: Hultsfred, lat: 57.4887, lng: 15.8435 }
 
-- id: energy-agency-southeast
-  name: Energikontor Sydost
+# --- Båda länen ---
+
+- id: energikontor-syd
+  name: Energikontor Syd
   type: other
-  description: Regionalt energikontor som stöttar bland annat företag i energi- och klimatfrågor.
-  website: https://energikontorsydost.se
+  description: Regionalt energikontor som genom tidsbegränsade projekt stöttar företag att bli mer energimedvetna och minska kostnader och resursanvändning.
+  website: https://energikontorsyd.se/foretag
   locations:
-    - { place: Växjö, lat: 56.8790, lng: 14.8059 }
+    - { place: Kalmar, lat: 56.6650, lng: 16.3530 }
+  example: true
+
+- id: godahus
+  name: GodaHus
+  type: network
+  description: Nätverk för hållbart byggande och boende med företag i Småland.
+  website: https://godahus.se
+  locations:
+    - { place: Växjö, lat: 56.8768, lng: 14.8160 }
+
+# --- Kronobergs län ---
+
+- id: region-kronoberg
+  name: Region Kronoberg
+  type: region
+  description: Regionalt utvecklingsansvar i Kronobergs län. Ansvarar för företagsstöd i form av checkar tillsammans med Almi och för Konsulttimmen.
+  website: https://www.regionkronoberg.se/regional-utveckling/finansiering/stod-till-foretagsutveckling/
+  locations:
+    - { place: Växjö, lat: 56.8808, lng: 14.8030 }
+
+- id: vaxjo-municipality
+  name: Växjö kommun
+  type: municipality
+  description: Kommunens näringslivsarbete och företagsservice.
+  website: https://foretag.vaxjo.se
+  locations:
+    - { place: Växjö, lat: 56.8777, lng: 14.8091 }
+
+- id: almi-kronoberg
+  name: Almi Kronoberg
+  type: business-support
+  description: Erbjuder rådgivning, lån och riskkapital i företagandets alla faser.
+  website: https://www.almi.se/regioner/kronoberg/
+  locations:
+    - { place: Växjö, lat: 56.8805, lng: 14.8125 }
+
+- id: vaxjo-linnaeus-science-park
+  name: Växjö Linnæus Science Park
+  type: science-park
+  description: Drivs av Växjö kommun i samverkan med näringslivet och akademin, för att ge företag och individer möjlighet att utveckla innovativa koncept och nätverk.
+  website: https://vaxjolinnaeussciencepark.se
+  locations:
+    - { place: Växjö, lat: 56.8565, lng: 14.8238 }
+
+- id: foretagsfabriken
+  name: Företagsfabriken i Kronoberg
+  type: science-park
+  description: Regional inkubator i Kronobergs län för lovande, nystartade och kunskapsintensiva företag.
+  website: https://foretagsfabriken.se
+  locations:
+    - { place: Växjö, lat: 56.8568, lng: 14.8244 }
+
+- id: nfc-vaxjo
+  name: Nyföretagarcentrum Växjö
+  type: business-support
+  description: Kostnadsfri, personlig och konfidentiell rådgivning om allt praktiskt kring en företagsstart.
+  website: https://nyforetagarcentrum.se/kronoberg/
+  locations:
+    - { place: Växjö, lat: 56.8785, lng: 14.8075 }
+
+- id: coompanion-kronoberg
+  name: Coompanion Kronoberg
+  type: business-support
+  description: Experter på kooperativt och hållbart företagande. Kostnadsfri rådgivning, praktisk utbildning och hjälp att hitta samarbetspartner.
+  website: https://coompanion.se/kronoberg/
+  locations:
+    - { place: Växjö, lat: 56.8770, lng: 14.8050 }
+
+- id: drivhuset-vaxjo
+  name: Drivhuset Växjö
+  type: business-support
+  description: Hjälper studenter vid Linnéuniversitetet att förverkliga sina idéer med vägledning, Start-up Class och event.
+  website: https://drivhuset.se/vaxjo
+  locations:
+    - { place: Växjö, lat: 56.8540, lng: 14.8290 }
+
+- id: destination-smaland
+  name: Destination Småland
+  type: network
+  description: Finns för företag inom besöksnäringen i Småland och Kronoberg.
+  website: https://www.visitsmaland.se
+  locations:
+    - { place: Växjö, lat: 56.8790, lng: 14.8100 }
+  example: true
+
+- id: campus-ljungby
+  name: Campus Ljungby
+  type: other
+  description: Kommunalt lärcentrum i Ljungby med högre utbildning och samverkan med näringslivet.
+  locations:
+    - { place: Ljungby, lat: 56.8330, lng: 13.9410 }
+  example: true
+
+# --- Nationellt & EU ---
 
 - id: tillvaxtverket
   name: Tillväxtverket
   type: public-agency
-  description: Statlig myndighet för regional tillväxt och företagande. Förvaltar EU:s regionalfond i Sverige.
+  description: Statlig myndighet för regional tillväxt och företagande. Förvaltar EU:s regionalfond i Sverige och koordinerar Enterprise Europe Network.
   website: https://tillvaxtverket.se
 
 - id: vinnova
   name: Vinnova
   type: public-agency
-  description: Sveriges innovationsmyndighet.
+  description: Sveriges innovationsmyndighet. Finansierar forsknings- och innovationsprojekt och inkubatorer.
   website: https://www.vinnova.se
+
+- id: rise
+  name: RISE
+  type: research-institute
+  description: Statligt forskningsinstitut med särskilt fokus på att stötta små och medelstora företag i deras innovationsprocesser. Har regional kontakt i Kalmar län.
+  website: https://www.ri.se/sv
+
+- id: business-sweden
+  name: Business Sweden
+  type: public-agency
+  description: Hjälper svenska företag att öka sin globala försäljning med exportrådgivning, kontakter och marknadsanalyser.
+  website: https://www.business-sweden.com/sv/
+
+- id: ekn
+  name: Exportkreditnämnden
+  type: public-agency
+  description: Myndighet som erbjuder garantier för betalning och finansiering vid export.
+  website: https://www.ekn.se
+
+- id: energimyndigheten
+  name: Energimyndigheten
+  type: public-agency
+  description: Har stöd och bidrag att söka på energiområdet.
+  website: https://www.energimyndigheten.se/om-oss/stod-och-bidrag-att-soka-pa-energiomradet/
+
+- id: naturvardsverket
+  name: Naturvårdsverket
+  type: public-agency
+  description: Ansvarar för Klimatklivet, stöd till investeringar som minskar utsläppen.
+  website: https://www.naturvardsverket.se
 
 - id: eu-erdf
   name: Europeiska regionala utvecklingsfonden

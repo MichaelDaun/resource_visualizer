@@ -9,8 +9,8 @@ const data: Dataset = {
     { id: "eu", name: "EU", type: "eu-fund" },
   ],
   initiatives: [
-    { id: "a", name: "A", kind: "project", status: "ongoing", supportTypes: ["skills"], lead: "uni", funders: ["region", "eu"], related: ["b"] },
-    { id: "b", name: "B", kind: "project", status: "planned", supportTypes: ["skills"], lead: "uni", related: ["a"] },
+    { id: "a", name: "A", kind: "project", status: "ongoing", supportTypes: ["skills"], lead: "uni", funders: ["region", "eu"] },
+    { id: "b", name: "B", kind: "project", status: "planned", supportTypes: ["skills"], lead: "uni" },
     { id: "c", name: "C", kind: "service", status: "ongoing", supportTypes: ["advisory"], lead: "eu" },
   ],
   relations: [{ from: "region", to: "uni", type: "collaborates" }],
@@ -36,11 +36,32 @@ describe("buildGraph", () => {
     expect(types).toContain("collaborates:region>uni");
   });
 
-  it("keeps a single edge for sister initiatives listed on both sides", () => {
-    expect(graph.edges.filter((e) => e.type === "related")).toHaveLength(1);
+  it("finds direct neighbours", () => {
+    expect([...neighbours(graph, "a")].sort()).toEqual(["a", "eu", "region", "uni"]);
+  });
+});
+
+describe("buildGraph with geography", () => {
+  const locate = (lat: number) => (lat > 56.8 ? { county: "07", municipality: "0780" } : { county: "08", municipality: "0880" });
+  const graph = buildGraph(
+    {
+      ...data,
+      actors: data.actors.map((a) =>
+        a.id === "uni"
+          ? { ...a, locations: [...a.locations!, { place: "Växjö", lat: 56.85, lng: 14.83 }] }
+          : a,
+      ),
+    },
+    locate,
+  );
+
+  it("gives actors every county they have a site in", () => {
+    expect(graph.byId.get("uni")!.counties.sort()).toEqual(["07", "08"]);
+    expect(graph.byId.get("eu")!.counties).toEqual([]);
   });
 
-  it("finds direct neighbours", () => {
-    expect([...neighbours(graph, "a")].sort()).toEqual(["a", "b", "eu", "region", "uni"]);
+  it("gives initiatives the counties of their lead and partners", () => {
+    expect(graph.byId.get("a")!.counties.sort()).toEqual(["07", "08"]);
+    expect(graph.byId.get("a")!.municipality).toBe("0880");
   });
 });

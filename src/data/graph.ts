@@ -1,10 +1,27 @@
 import type { Actor, ActorRelationType, Dataset, Initiative, Location } from "./types";
 
-export type EdgeType = "lead" | "partner" | "funds" | "related" | ActorRelationType;
+export type EdgeType = "lead" | "partner" | "funds" | ActorRelationType;
+
+interface NodeBase {
+  id: string;
+  name: string;
+  location?: Location;
+  /** Counties the node belongs to: where an actor has sites, or where an initiative's lead and partners are. */
+  counties: string[];
+  /** Municipality code of the primary location. */
+  municipality?: string;
+  /** All municipalities the node is present in: an actor's sites, or an initiative's lead and partners. */
+  municipalities: string[];
+}
 
 export type GraphNode =
-  | { id: string; kind: "actor"; name: string; actor: Actor; location?: Location }
-  | { id: string; kind: "initiative"; name: string; initiative: Initiative; location?: Location };
+  | (NodeBase & { kind: "actor"; actor: Actor })
+  | (NodeBase & { kind: "initiative"; initiative: Initiative });
+
+export type Locate = (lat: number, lng: number) => { county?: string; municipality?: string };
+
+/** Looks up a municipality by name ("Hultsfred"); used for initiatives' `serves`. */
+export type MunicipalityByName = (name: string) => { code: string; county: string } | undefined;
 
 export interface GraphEdge {
   id: string;
@@ -26,13 +43,33 @@ export interface Graph {
  * Turns the dataset into a graph. Initiatives have no coordinates of their
  * own; they are placed at the primary location of the actor that leads them.
  */
-export function buildGraph(data: Dataset): Graph {
+export function buildGraph(
+  data: Dataset,
+  locate: Locate = () => ({}),
+  municipalityByName: MunicipalityByName = () => undefined,
+): Graph {
   const nodes: GraphNode[] = [];
   const edges: GraphEdge[] = [];
   const actorsById = new Map(data.actors.map((a) => [a.id, a]));
 
+  const actorCounties = new Map<string, string[]>();
+  const actorMunicipalities = new Map<string, string[]>();
   for (const actor of data.actors) {
-    nodes.push({ id: actor.id, kind: "actor", name: actor.name, actor, location: actor.locations?.[0] });
+    const places = (actor.locations ?? []).map((l) => locate(l.lat, l.lng));
+    const counties = [...new Set(places.flatMap((p) => (p.county ? [p.county] : [])))];
+    const municipalities = [...new Set(places.flatMap((p) => (p.municipality ? [p.municipality] : [])))];
+    actorCounties.set(actor.id, counties);
+    actorMunicipalities.set(actor.id, municipalities);
+    nodes.push({
+      id: actor.id,
+      kind: "actor",
+      name: actor.name,
+      actor,
+      location: actor.locations?.[0],
+      counties,
+      municipality: places[0]?.municipality,
+      municipalities,
+    });
   }
 
   const add = (source: string, target: string, type: EdgeType, note?: string) =>
@@ -40,27 +77,27 @@ export function buildGraph(data: Dataset): Graph {
 
   for (const initiative of data.initiatives) {
     const lead = actorsById.get(initiative.lead);
+    const involved = [initiative.lead, ...(initiative.partners ?? [])];
+    const location = lead?.locations?.[0];
+    const served = (initiative.serves ?? []).flatMap((name) => {
+      const m = municipalityByName(name);
+      return m ? [m] : [];
+    });
     nodes.push({
       id: initiative.id,
       kind: "initiative",
       name: initiative.name,
       initiative,
-      location: lead?.locations?.[0],
+      location,
+      counties: [...new Set([...involved.flatMap((id) => actorCounties.get(id) ?? []), ...served.map((m) => m.county)])],
+      municipality: location ? locate(location.lat, location.lng).municipality : undefined,
+      municipalities: [
+        ...new Set([...involved.flatMap((id) => actorMunicipalities.get(id) ?? []), ...served.map((m) => m.code)]),
+      ],
     });
     add(initiative.lead, initiative.id, "lead");
     for (const id of initiative.partners ?? []) add(id, initiative.id, "partner");
     for (const id of initiative.funders ?? []) add(id, initiative.id, "funds");
-  }
-
-  // Sister relations are symmetric; keep one edge per pair however it was listed.
-  const seenPairs = new Set<string>();
-  for (const initiative of data.initiatives) {
-    for (const other of initiative.related ?? []) {
-      const pair = [initiative.id, other].sort().join("|");
-      if (seenPairs.has(pair)) continue;
-      seenPairs.add(pair);
-      add(initiative.id, other, "related");
-    }
   }
 
   for (const r of data.relations) add(r.from, r.to, r.type, r.note);
